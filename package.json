@@ -1,0 +1,55 @@
+{
+  "name": "n8n-nodes-open-project",
+  "version": "1.0.0",
+  "description": "Connect your workflows to OpenProject to create and manage projects, handle work packages, and track time — all without leaving n8n.",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc && gulp build:icons",
+    "dev": "tsc --watch",
+    "format": "prettier \"nodes/**/*.{ts,js,json,md}\" \"credentials/**/*.{ts,js,json,md}\" --write",
+    "lint": "eslint \"nodes/**/*.{ts,js}\" \"credentials/**/*.{ts,js}\" package.json",
+    "lintfix": "eslint \"nodes/**/*.{ts,js}\" \"credentials/**/*.{ts,js}\" package.json --fix",
+    "prepublishOnly": "npm run build && npm run lint",
+    "clean": "rimraf dist"
+  },
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n-nodes",
+    "integration",
+    "api",
+    "automation",
+    "openproject"
+  ],
+  "author": "Monarch Hasija",
+  "license": "MIT",
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE.md"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/OpenProjectCredentials.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/OpenProject/OpenProject.node.js"
+    ]
+  },
+  "devDependencies": {
+    "@typescript-eslint/parser": "^8.x",
+    "@typescript-eslint/eslint-plugin": "^8.x",
+    "eslint": "^9.x",
+    "gulp": "^4.x",
+    "n8n-workflow": "^1.x",
+    "prettier": "^3.x",
+    "typescript": "^5.x",
+    "rimraf": "^5.x"
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
