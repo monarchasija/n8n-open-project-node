@@ -1,6 +1,8 @@
 import {
     IExecuteFunctions,
+    ILoadOptionsFunctions,
     INodeExecutionData,
+    INodePropertyOptions,
     INodeType,
     INodeTypeDescription,
     IDataObject,
@@ -68,6 +70,7 @@ export class OpenProject implements INodeType {
                     { name: 'Create', value: 'create', action: 'Create a work package' },
                     { name: 'Get', value: 'get', action: 'Get a work package' },
                     { name: 'Get All', value: 'getAll', action: 'Get all work packages' },
+                    { name: 'Get Filtered', value: 'getFiltered', action: 'Get filtered work packages' },
                     { name: 'Update', value: 'update', action: 'Update a work package' },
                     { name: 'Delete', value: 'delete', action: 'Delete a work package' },
                 ],
@@ -169,15 +172,136 @@ export class OpenProject implements INodeType {
 
             // ─── WORK PACKAGE FIELDS ─────────────────────────────────────
             {
-                displayName: 'Project ID',
+                displayName: 'Project',
                 name: 'projectId',
-                type: 'string',
+                type: 'options',
+                typeOptions: { loadOptionsMethod: 'getProjects' },
                 default: '',
                 required: true,
                 displayOptions: {
                     show: { resource: ['workPackage'], operation: ['create', 'getAll'] },
                 },
-                description: 'The ID of the project this work package belongs to',
+                description: 'The project this work package belongs to',
+            },
+
+            // ─── GET FILTERED FIELDS ─────────────────────────────────────
+            {
+                displayName: 'Project',
+                name: 'projectId',
+                type: 'options',
+                typeOptions: { loadOptionsMethod: 'getProjects' },
+                default: '',
+                required: true,
+                displayOptions: {
+                    show: { resource: ['workPackage'], operation: ['getFiltered'] },
+                },
+                description: 'The project to fetch work packages from',
+            },
+            {
+                displayName: 'Assignee Input Method',
+                name: 'assigneeInputMethod',
+                type: 'options',
+                options: [
+                    { name: 'None', value: 'none' },
+                    { name: 'Enter ID Manually', value: 'manual' },
+                    { name: 'Select from Project Members', value: 'select' },
+                ],
+                default: 'none',
+                displayOptions: {
+                    show: { resource: ['workPackage'], operation: ['getFiltered'] },
+                },
+            },
+            {
+                displayName: 'Assignee ID',
+                name: 'assigneeId',
+                type: 'string',
+                default: '',
+                displayOptions: {
+                    show: {
+                        resource: ['workPackage'],
+                        operation: ['getFiltered'],
+                        assigneeInputMethod: ['manual'],
+                    },
+                },
+                description: 'User ID of the assignee to filter by',
+            },
+            {
+                displayName: 'Assignee',
+                name: 'assigneeSelected',
+                type: 'options',
+                typeOptions: {
+                    loadOptionsMethod: 'getProjectMembers',
+                    loadOptionsDependsOn: ['projectId'],
+                },
+                default: '',
+                displayOptions: {
+                    show: {
+                        resource: ['workPackage'],
+                        operation: ['getFiltered'],
+                        assigneeInputMethod: ['select'],
+                    },
+                },
+                description: 'Select the assignee from the project members',
+            },
+            {
+                displayName: 'Priority',
+                name: 'priorityId',
+                type: 'options',
+                options: [
+                    { name: '(Any)', value: '' },
+                    { name: 'Low', value: '1' },
+                    { name: 'Normal', value: '8' },
+                    { name: 'High', value: '9' },
+                    { name: 'Immediate', value: '10' },
+                ],
+                default: '',
+                displayOptions: {
+                    show: { resource: ['workPackage'], operation: ['getFiltered'] },
+                },
+            },
+            {
+                displayName: 'Status',
+                name: 'statusFilter',
+                type: 'options',
+                options: [
+                    { name: '(Any)', value: '' },
+                    { name: 'Open', value: 'o' },
+                    { name: 'Closed', value: 'c' },
+                    { name: 'Specific ID (manual input)', value: 'manual' },
+                ],
+                default: '',
+                displayOptions: {
+                    show: { resource: ['workPackage'], operation: ['getFiltered'] },
+                },
+            },
+            {
+                displayName: 'Status ID',
+                name: 'statusId',
+                type: 'string',
+                default: '',
+                displayOptions: {
+                    show: {
+                        resource: ['workPackage'],
+                        operation: ['getFiltered'],
+                        statusFilter: ['manual'],
+                    },
+                },
+                description: 'Specific status ID to filter by',
+            },
+            {
+                displayName: 'Due Date Filter',
+                name: 'dueDateFilter',
+                type: 'options',
+                options: [
+                    { name: 'None', value: 'none' },
+                    { name: 'Overdue', value: '<t+0' },
+                    { name: 'Due This Week', value: 'w' },
+                    { name: 'Due in 7 Days', value: '<t+7' },
+                ],
+                default: 'none',
+                displayOptions: {
+                    show: { resource: ['workPackage'], operation: ['getFiltered'] },
+                },
             },
             {
                 displayName: 'Subject',
@@ -303,6 +427,45 @@ export class OpenProject implements INodeType {
         ],
     };
 
+    methods = {
+        loadOptions: {
+            async getProjects(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+                const credentials = await this.getCredentials('openProjectApi');
+                const baseUrl = `${credentials.baseUrl}/api/v3`;
+                const response = await this.helpers.httpRequestWithAuthentication.call(
+                    this, 'openProjectApi',
+                    { method: 'GET', url: `${baseUrl}/projects`, json: true },
+                );
+                const projects: IDataObject[] = (response._embedded?.elements ?? []) as IDataObject[];
+                return projects.map((project: IDataObject): INodePropertyOptions => ({
+                    name: project.name as string,
+                    value: String(project.id),
+                }));
+            },
+
+            async getProjectMembers(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+                const credentials = await this.getCredentials('openProjectApi');
+                const baseUrl = `${credentials.baseUrl}/api/v3`;
+                const projectId = this.getCurrentNodeParameter('projectId') as string;
+                if (!projectId) return [];
+                const response = await this.helpers.httpRequestWithAuthentication.call(
+                    this, 'openProjectApi',
+                    { method: 'GET', url: `${baseUrl}/projects/${projectId}/memberships`, json: true },
+                );
+                const memberships: IDataObject[] = (response._embedded?.elements ?? []) as IDataObject[];
+                return memberships.map((membership: IDataObject): INodePropertyOptions => {
+                    const principal = (membership._links as IDataObject)?.principal as IDataObject;
+                    const href = principal?.href as string ?? '';
+                    const userId = href.split('/').pop() ?? '';
+                    return {
+                        name: principal?.title as string ?? userId,
+                        value: userId,
+                    };
+                });
+            },
+        },
+    };
+
     async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
         const items = this.getInputData();
         const returnData: IDataObject[] = [];
@@ -320,6 +483,7 @@ export class OpenProject implements INodeType {
                         this, 'openProjectApi',
                         { method: 'GET', url: `${baseUrl}/projects`, json: true },
                     );
+                    console.log(response);
                     const projects = response._embedded?.elements ?? [];
                     returnData.push(...projects);
 
@@ -374,12 +538,61 @@ export class OpenProject implements INodeType {
 
                 } else if (operation === 'get') {
                     const id = this.getNodeParameter('id', i) as string;
-                    const response = await this.helpers.httpRequestWithAuthentication.call(
-                        this, 'openProjectApi',
-                        { method: 'GET', url: `${baseUrl}/work_packages/${id}`, json: true },
-                    );
-                    returnData.push(response);
+                    // Fetch both simultaneously
+                    const [response, activitiesResponse] = await Promise.all([
+                        this.helpers.httpRequestWithAuthentication.call(
+                            this, 'openProjectApi',
+                            { method: 'GET', url: `${baseUrl}/work_packages/${id}`, json: true },
+                        ),
+                        this.helpers.httpRequestWithAuthentication.call(
+                            this, 'openProjectApi',
+                            { method: 'GET', url: `${baseUrl}/work_packages/${id}/activities`, json: true },
+                        ),
+                    ]);
 
+                        // Get last activity
+                    const activities = activitiesResponse._embedded?.elements ?? [];
+                    const lastActivity = activities[activities.length - 1];
+
+                
+                    const result: IDataObject = {
+                        // Core
+                        id: response.id,
+                        subject: response.subject,
+                        percentageDone: response.percentageDone,
+                        startDate: response.startDate,
+                        dueDate: response.dueDate,
+                        estimatedTime: response.estimatedTime,
+                        spentTime: response.spentTime,
+                        createdAt: response.createdAt,
+                        updatedAt: response.updatedAt,
+                
+                        // Flattened from _links
+                        statusName: response._links?.status?.title,
+                        typeName: response._links?.type?.title,
+                        priorityName: response._links?.priority?.title,
+                        projectName: response._links?.project?.title,
+                        categoryName: response._links?.category?.title,
+                        versionName: response._links?.version?.title,
+                        assigneeName: response._links?.assignee?.title,
+                        responsibleName: response._links?.responsible?.title,
+                        authorName: response._links?.author?.title,
+                
+                        // IDs for further API calls
+                        statusId: response._embedded?.status?.id,
+                        assigneeId: response._embedded?.assignee?.id,
+                        responsibleId: response._embedded?.responsible?.id,
+                        projectId: response._embedded?.project?.id,
+                        isClosed: response._embedded?.status?.isClosed,
+
+                         // Last activity
+                        lastActivityAt: lastActivity?.createdAt ?? null,
+                        lastActivityBy: lastActivity?.links?.user?.title ?? lastActivity?._links?.user?.title ?? null,
+                        lastActivityComment: lastActivity?.comment?.raw ?? null,
+                    };
+                
+                    returnData.push(result);
+                
                 } else if (operation === 'create') {
                     const projectId = this.getNodeParameter('projectId', i) as string;
                     const subject = this.getNodeParameter('subject', i) as string;
@@ -419,6 +632,73 @@ export class OpenProject implements INodeType {
                         { method: 'DELETE', url: `${baseUrl}/work_packages/${id}`, json: true },
                     );
                     returnData.push({ success: true, id });
+
+                } else if (operation === 'getFiltered') {
+                    const projectId = this.getNodeParameter('projectId', i) as string;
+                    const assigneeInputMethod = this.getNodeParameter('assigneeInputMethod', i) as string;
+                    const priorityId = this.getNodeParameter('priorityId', i) as string;
+                    const statusFilter = this.getNodeParameter('statusFilter', i) as string;
+                    const dueDateFilter = this.getNodeParameter('dueDateFilter', i) as string;
+
+                    const filters: IDataObject[] = [];
+
+                    if (assigneeInputMethod === 'manual') {
+                        const assigneeId = this.getNodeParameter('assigneeId', i) as string;
+                        if (assigneeId) {
+                            filters.push({ assignee: { operator: '=', values: [assigneeId] } });
+                        }
+                    } else if (assigneeInputMethod === 'select') {
+                        const assigneeSelected = this.getNodeParameter('assigneeSelected', i) as string;
+                        if (assigneeSelected) {
+                            filters.push({ assignee: { operator: '=', values: [assigneeSelected] } });
+                        }
+                    }
+
+                    if (priorityId) {
+                        filters.push({ priority: { operator: '=', values: [priorityId] } });
+                    }
+
+                    if (statusFilter === 'o') {
+                        filters.push({ status: { operator: 'o', values: [] } });
+                    } else if (statusFilter === 'c') {
+                        filters.push({ status: { operator: 'c', values: [] } });
+                    } else if (statusFilter === 'manual') {
+                        const statusId = this.getNodeParameter('statusId', i) as string;
+                        if (statusId) {
+                            filters.push({ status: { operator: '=', values: [statusId] } });
+                        }
+                    }
+
+                    if (dueDateFilter && dueDateFilter !== 'none') {
+                        filters.push({ dueDate: { operator: dueDateFilter, values: [] } });
+                    }
+
+                    let url = `${baseUrl}/projects/${projectId}/work_packages`;
+                    if (filters.length > 0) {
+                        url += `?filters=${encodeURIComponent(JSON.stringify(filters))}`;
+                    }
+
+                    const response = await this.helpers.httpRequestWithAuthentication.call(
+                        this, 'openProjectApi',
+                        { method: 'GET', url, json: true },
+                    );
+
+                    const elements: IDataObject[] = (response._embedded?.elements ?? []) as IDataObject[];
+                    const flattened = elements.map((wp: IDataObject): IDataObject => ({
+                        id: wp.id,
+                        subject: wp.subject,
+                        percentageDone: wp.percentageDone,
+                        startDate: wp.startDate,
+                        dueDate: wp.dueDate,
+                        createdAt: wp.createdAt,
+                        updatedAt: wp.updatedAt,
+                        statusName: (wp._links as IDataObject)?.status ? ((wp._links as IDataObject).status as IDataObject).title : undefined,
+                        priorityName: (wp._links as IDataObject)?.priority ? ((wp._links as IDataObject).priority as IDataObject).title : undefined,
+                        assigneeName: (wp._links as IDataObject)?.assignee ? ((wp._links as IDataObject).assignee as IDataObject).title : undefined,
+                        projectName: (wp._links as IDataObject)?.project ? ((wp._links as IDataObject).project as IDataObject).title : undefined,
+                        typeName: (wp._links as IDataObject)?.type ? ((wp._links as IDataObject).type as IDataObject).title : undefined,
+                    }));
+                    returnData.push(...flattened);
                 }
             }
 
