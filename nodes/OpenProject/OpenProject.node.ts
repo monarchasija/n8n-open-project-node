@@ -327,7 +327,7 @@ export class OpenProject implements INodeType {
                     const id = this.getNodeParameter('id', i) as string;
                     const response = await this.helpers.httpRequestWithAuthentication.call(
                         this, 'openProjectApi',
-                        { method: 'GET', url: `${baseUrl}/projects/${id}`, json: true },
+                        { method: 'GET', url: `${baseUrl}/projects/${id}/activities`, json: true },
                     );
                     returnData.push(response);
 
@@ -378,7 +378,39 @@ export class OpenProject implements INodeType {
                         this, 'openProjectApi',
                         { method: 'GET', url: `${baseUrl}/work_packages/${id}`, json: true },
                     );
-                    returnData.push(response);
+
+                    const result: IDataObject = {
+                        // Core
+                        id: response.id,
+                        subject: response.subject,
+                        percentageDone: response.percentageDone,
+                        startDate: response.startDate,
+                        dueDate: response.dueDate,
+                        estimatedTime: response.estimatedTime,
+                        spentTime: response.spentTime,
+                        createdAt: response.createdAt,
+                        updatedAt: response.updatedAt,
+
+                        // Flattened from _links
+                        statusName: response._links?.status?.title,
+                        typeName: response._links?.type?.title,
+                        priorityName: response._links?.priority?.title,
+                        projectName: response._links?.project?.title,
+                        categoryName: response._links?.category?.title,
+                        versionName: response._links?.version?.title,
+                        assigneeName: response._links?.assignee?.title,
+                        responsibleName: response._links?.responsible?.title,
+                        authorName: response._links?.author?.title,
+
+                        // IDs for further API calls
+                        statusId: response._embedded?.status?.id,
+                        assigneeId: response._embedded?.assignee?.id,
+                        responsibleId: response._embedded?.responsible?.id,
+                        projectId: response._embedded?.project?.id,
+                        isClosed: response._embedded?.status?.isClosed,
+                    };
+
+                    returnData.push(result);
 
                 } else if (operation === 'create') {
                     const projectId = this.getNodeParameter('projectId', i) as string;

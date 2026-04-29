@@ -293,7 +293,7 @@ class OpenProject {
         };
     }
     async execute() {
-        var _a, _b, _c, _d, _e, _f;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9;
         const items = this.getInputData();
         const returnData = [];
         const credentials = await this.getCredentials('openProjectApi');
@@ -310,7 +310,7 @@ class OpenProject {
                 }
                 else if (operation === 'get') {
                     const id = this.getNodeParameter('id', i);
-                    const response = await this.helpers.httpRequestWithAuthentication.call(this, 'openProjectApi', { method: 'GET', url: `${baseUrl}/projects/${id}`, json: true });
+                    const response = await this.helpers.httpRequestWithAuthentication.call(this, 'openProjectApi', { method: 'GET', url: `${baseUrl}/projects/${id}/activities`, json: true });
                     returnData.push(response);
                 }
                 else if (operation === 'create') {
@@ -344,7 +344,35 @@ class OpenProject {
                 else if (operation === 'get') {
                     const id = this.getNodeParameter('id', i);
                     const response = await this.helpers.httpRequestWithAuthentication.call(this, 'openProjectApi', { method: 'GET', url: `${baseUrl}/work_packages/${id}`, json: true });
-                    returnData.push(response);
+                    const result = {
+                        // Core
+                        id: response.id,
+                        subject: response.subject,
+                        percentageDone: response.percentageDone,
+                        startDate: response.startDate,
+                        dueDate: response.dueDate,
+                        estimatedTime: response.estimatedTime,
+                        spentTime: response.spentTime,
+                        createdAt: response.createdAt,
+                        updatedAt: response.updatedAt,
+                        // Flattened from _links
+                        statusName: (_f = (_e = response._links) === null || _e === void 0 ? void 0 : _e.status) === null || _f === void 0 ? void 0 : _f.title,
+                        typeName: (_h = (_g = response._links) === null || _g === void 0 ? void 0 : _g.type) === null || _h === void 0 ? void 0 : _h.title,
+                        priorityName: (_k = (_j = response._links) === null || _j === void 0 ? void 0 : _j.priority) === null || _k === void 0 ? void 0 : _k.title,
+                        projectName: (_m = (_l = response._links) === null || _l === void 0 ? void 0 : _l.project) === null || _m === void 0 ? void 0 : _m.title,
+                        categoryName: (_p = (_o = response._links) === null || _o === void 0 ? void 0 : _o.category) === null || _p === void 0 ? void 0 : _p.title,
+                        versionName: (_r = (_q = response._links) === null || _q === void 0 ? void 0 : _q.version) === null || _r === void 0 ? void 0 : _r.title,
+                        assigneeName: (_t = (_s = response._links) === null || _s === void 0 ? void 0 : _s.assignee) === null || _t === void 0 ? void 0 : _t.title,
+                        responsibleName: (_v = (_u = response._links) === null || _u === void 0 ? void 0 : _u.responsible) === null || _v === void 0 ? void 0 : _v.title,
+                        authorName: (_x = (_w = response._links) === null || _w === void 0 ? void 0 : _w.author) === null || _x === void 0 ? void 0 : _x.title,
+                        // IDs for further API calls
+                        statusId: (_z = (_y = response._embedded) === null || _y === void 0 ? void 0 : _y.status) === null || _z === void 0 ? void 0 : _z.id,
+                        assigneeId: (_1 = (_0 = response._embedded) === null || _0 === void 0 ? void 0 : _0.assignee) === null || _1 === void 0 ? void 0 : _1.id,
+                        responsibleId: (_3 = (_2 = response._embedded) === null || _2 === void 0 ? void 0 : _2.responsible) === null || _3 === void 0 ? void 0 : _3.id,
+                        projectId: (_5 = (_4 = response._embedded) === null || _4 === void 0 ? void 0 : _4.project) === null || _5 === void 0 ? void 0 : _5.id,
+                        isClosed: (_7 = (_6 = response._embedded) === null || _6 === void 0 ? void 0 : _6.status) === null || _7 === void 0 ? void 0 : _7.isClosed,
+                    };
+                    returnData.push(result);
                 }
                 else if (operation === 'create') {
                     const projectId = this.getNodeParameter('projectId', i);
@@ -382,7 +410,7 @@ class OpenProject {
             else if (resource === 'timeEntry') {
                 if (operation === 'getAll') {
                     const response = await this.helpers.httpRequestWithAuthentication.call(this, 'openProjectApi', { method: 'GET', url: `${baseUrl}/time_entries`, json: true });
-                    const entries = (_f = (_e = response._embedded) === null || _e === void 0 ? void 0 : _e.elements) !== null && _f !== void 0 ? _f : [];
+                    const entries = (_9 = (_8 = response._embedded) === null || _8 === void 0 ? void 0 : _8.elements) !== null && _9 !== void 0 ? _9 : [];
                     returnData.push(...entries);
                 }
                 else if (operation === 'get') {
