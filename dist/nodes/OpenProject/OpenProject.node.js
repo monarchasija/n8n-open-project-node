@@ -36,21 +36,6 @@ class OpenProject {
                     default: 'project',
                 },
                 // ─── PROJECT OPERATIONS ──────────────────────────────────────
-                // {
-                //     displayName: 'Operation',
-                //     name: 'operation',
-                //     type: 'options',
-                //     noDataExpression: true,
-                //     displayOptions: { show: { resource: ['project'] } },
-                //     options: [
-                //         { name: 'Create', value: 'create', action: 'Create a project' },
-                //         { name: 'Get', value: 'get', action: 'Get a project' },
-                //         { name: 'Get All', value: 'getAll', action: 'Get all projects' },
-                //         { name: 'Update', value: 'update', action: 'Update a project' },
-                //         { name: 'Delete', value: 'delete', action: 'Delete a project' },
-                //     ],
-                //     default: 'getAll',
-                // },
                 // ─── WORK PACKAGE OPERATIONS ─────────────────────────────────
                 {
                     displayName: 'Operation',
@@ -68,21 +53,6 @@ class OpenProject {
                     default: 'get',
                 },
                 // ─── TIME ENTRY OPERATIONS ───────────────────────────────────
-                // {
-                //     displayName: 'Operation',
-                //     name: 'operation',
-                //     type: 'options',
-                //     noDataExpression: true,
-                //     displayOptions: { show: { resource: ['timeEntry'] } },
-                //     options: [
-                //         { name: 'Create', value: 'create', action: 'Create a time entry' },
-                //         { name: 'Get', value: 'get', action: 'Get a time entry' },
-                //         { name: 'Get All', value: 'getAll', action: 'Get all time entries' },
-                //         { name: 'Update', value: 'update', action: 'Update a time entry' },
-                //         { name: 'Delete', value: 'delete', action: 'Delete a time entry' },
-                //     ],
-                //     default: 'getAll',
-                // },
                 // ─── SHARED: ID FIELD ────────────────────────────────────────
                 {
                     displayName: 'ID',
@@ -99,77 +69,45 @@ class OpenProject {
                     },
                     description: 'The ID of the resource',
                 },
-                // ─── PROJECT FIELDS ──────────────────────────────────────────
-                // {
-                //     displayName: 'Name',
-                //     name: 'name',
-                //     type: 'string',
-                //     default: '',
-                //     required: true,
-                //     displayOptions: {
-                //         show: { resource: ['project'], operation: ['create'] },
-                //     },
-                //     description: 'Name of the project',
-                // },
-                // {
-                //     displayName: 'Identifier',
-                //     name: 'identifier',
-                //     type: 'string',
-                //     default: '',
-                //     required: true,
-                //     displayOptions: {
-                //         show: { resource: ['project'], operation: ['create'] },
-                //     },
-                //     description: 'Unique identifier/slug for the project (e.g. my-project)',
-                // },
-                // {
-                //     displayName: 'Additional Fields',
-                //     name: 'additionalFields',
-                //     type: 'collection',
-                //     placeholder: 'Add Field',
-                //     default: {},
-                //     displayOptions: {
-                //         show: { resource: ['project'], operation: ['create', 'update'] },
-                //     },
-                //     options: [
-                //         {
-                //             displayName: 'Description',
-                //             name: 'description',
-                //             type: 'string',
-                //             default: '',
-                //             typeOptions: { rows: 3 },
-                //         },
-                //         {
-                //             displayName: 'Public',
-                //             name: 'public',
-                //             type: 'boolean',
-                //             default: false,
-                //         },
-                //         {
-                //             displayName: 'Status',
-                //             name: 'status',
-                //             type: 'options',
-                //             options: [
-                //                 { name: 'Active', value: 'active' },
-                //                 { name: 'Off Track', value: 'off_track' },
-                //                 { name: 'At Risk', value: 'at_risk' },
-                //                 { name: 'On Track', value: 'on_track' },
-                //             ],
-                //             default: 'active',
-                //         },
-                //     ],
-                // },
                 // ─── WORK PACKAGE FIELDS ─────────────────────────────────────
                 {
-                    displayName: 'Project ID',
+                    displayName: 'Project',
                     name: 'projectId',
-                    type: 'string',
-                    default: '',
+                    type: 'resourceLocator',
+                    default: { mode: 'list', value: '' },
                     required: true,
                     displayOptions: {
                         show: { resource: ['workPackage'], operation: ['getFiltered'] },
                     },
-                    description: 'The ID of the project to get work packages from',
+                    description: 'The project to get work packages from',
+                    modes: [
+                        {
+                            displayName: 'From List',
+                            name: 'list',
+                            type: 'list',
+                            placeholder: 'Search projects…',
+                            typeOptions: {
+                                searchListMethod: 'searchProjects',
+                                searchable: true,
+                                searchFilterRequired: false,
+                            },
+                        },
+                        {
+                            displayName: 'By ID',
+                            name: 'id',
+                            type: 'string',
+                            placeholder: 'e.g. 42',
+                            validation: [
+                                {
+                                    type: 'regex',
+                                    properties: {
+                                        regex: '^[0-9]+$',
+                                        errorMessage: 'Enter a numeric project ID',
+                                    },
+                                },
+                            ],
+                        },
+                    ],
                 },
                 {
                     displayName: 'Filters',
@@ -197,66 +135,118 @@ class OpenProject {
                             ],
                             default: '',
                         },
+                        {
+                            displayName: 'Assignee',
+                            name: 'assignee',
+                            type: 'resourceLocator',
+                            default: { mode: 'list', value: '' },
+                            required: false,
+                            description: 'The assignee to filter work packages by',
+                            modes: [
+                                {
+                                    displayName: 'From List',
+                                    name: 'list',
+                                    type: 'list',
+                                    placeholder: 'Search project members…',
+                                    typeOptions: {
+                                        searchListMethod: 'searchUsers',
+                                        searchable: true,
+                                        searchFilterRequired: true,
+                                    },
+                                },
+                                {
+                                    displayName: 'By ID',
+                                    name: 'id',
+                                    type: 'string',
+                                    placeholder: 'e.g. 5',
+                                    validation: [
+                                        {
+                                            type: 'regex',
+                                            properties: {
+                                                regex: '^[0-9]+$',
+                                                errorMessage: 'Enter a numeric user ID',
+                                            },
+                                        },
+                                    ],
+                                },
+                            ],
+                        }
                     ],
                 },
-                // ─── TIME ENTRY FIELDS ───────────────────────────────────────
-                // {
-                //     displayName: 'Work Package ID',
-                //     name: 'workPackageId',
-                //     type: 'string',
-                //     default: '',
-                //     required: true,
-                //     displayOptions: {
-                //         show: { resource: ['timeEntry'], operation: ['create'] },
-                //     },
-                //     description: 'The ID of the work package to log time against',
-                // },
-                // {
-                //     displayName: 'Hours',
-                //     name: 'hours',
-                //     type: 'number',
-                //     default: 1,
-                //     required: true,
-                //     displayOptions: {
-                //         show: { resource: ['timeEntry'], operation: ['create', 'update'] },
-                //     },
-                //     description: 'Number of hours to log',
-                // },
-                // {
-                //     displayName: 'Spent On (Date)',
-                //     name: 'spentOn',
-                //     type: 'dateTime',
-                //     default: '',
-                //     required: true,
-                //     displayOptions: {
-                //         show: { resource: ['timeEntry'], operation: ['create', 'update'] },
-                //     },
-                //     description: 'The date the time was spent',
-                // },
-                // {
-                //     displayName: 'Additional Fields',
-                //     name: 'additionalFields',
-                //     type: 'collection',
-                //     placeholder: 'Add Field',
-                //     default: {},
-                //     displayOptions: {
-                //         show: { resource: ['timeEntry'], operation: ['create', 'update'] },
-                //     },
-                //     options: [
-                //         {
-                //             displayName: 'Comment',
-                //             name: 'comment',
-                //             type: 'string',
-                //             default: '',
-                //             typeOptions: { rows: 2 },
-                //         },
-                //     ],
-                // },
             ],
+        };
+        this.methods = {
+            listSearch: {
+                async searchProjects(query) {
+                    var _a, _b;
+                    const credentials = await this.getCredentials('openProjectApi');
+                    const baseUrl = `${credentials.baseUrl}/api/v3`;
+                    const qs = { pageSize: 50 };
+                    const q = query === null || query === void 0 ? void 0 : query.trim();
+                    if (q) {
+                        qs.filters = JSON.stringify([
+                            { name: { operator: '~', values: [q] } },
+                        ]);
+                    }
+                    const response = await this.helpers.httpRequestWithAuthentication.call(this, 'openProjectApi', { method: 'GET', url: `${baseUrl}/projects`, json: true, qs });
+                    const elements = (_b = (_a = response._embedded) === null || _a === void 0 ? void 0 : _a.elements) !== null && _b !== void 0 ? _b : [];
+                    return {
+                        results: elements.map((project) => ({
+                            name: project.name,
+                            value: String(project.id),
+                        })),
+                    };
+                },
+                async searchUsers(query) {
+                    var _a, _b, _c, _d;
+                    const projectId = this.getNodeParameter('projectId', '', {
+                        extractValue: true,
+                    });
+                    const q = query === null || query === void 0 ? void 0 : query.trim();
+                    if (!(projectId === null || projectId === void 0 ? void 0 : projectId.trim()) || !q) {
+                        // UI will require a query (searchFilterRequired: true),
+                        // but keep this defensive to avoid bad requests.
+                        return { results: [] };
+                    }
+                    const credentials = await this.getCredentials('openProjectApi');
+                    const baseUrl = `${credentials.baseUrl}/api/v3`;
+                    // OpenProject can't filter /users by project directly.
+                    // We list memberships in the selected project, optionally narrowed by principal name.
+                    const filters = [
+                        { project: { operator: '=', values: [String(projectId)] } },
+                        { any_name_attribute: { operator: '~', values: [q] } },
+                    ];
+                    const response = await this.helpers.httpRequestWithAuthentication.call(this, 'openProjectApi', {
+                        method: 'GET',
+                        url: `${baseUrl}/memberships`,
+                        json: true,
+                        qs: { filters: JSON.stringify(filters), pageSize: 200 },
+                    });
+                    const elements = (_b = (_a = response._embedded) === null || _a === void 0 ? void 0 : _a.elements) !== null && _b !== void 0 ? _b : [];
+                    const seen = new Set();
+                    const results = [];
+                    for (const membership of elements) {
+                        const links = membership._links;
+                        const principal = links === null || links === void 0 ? void 0 : links.principal;
+                        const href = (_c = principal === null || principal === void 0 ? void 0 : principal.href) !== null && _c !== void 0 ? _c : '';
+                        const title = (_d = principal === null || principal === void 0 ? void 0 : principal.title) !== null && _d !== void 0 ? _d : '';
+                        const userMatch = href.match(/\/users\/(\d+)\/?$/);
+                        if (!userMatch || !title)
+                            continue;
+                        const id = userMatch[1];
+                        if (seen.has(id))
+                            continue;
+                        seen.add(id);
+                        results.push({ name: title, value: id });
+                    }
+                    results.sort((a, b) => a.name.localeCompare(b.name));
+                    return { results };
+                },
+            },
         };
     }
     async execute() {
-        var _a, _b, _c, _d, _e, _f;
+        var _a, _b;
         const items = this.getInputData();
         const returnData = [];
         const credentials = await this.getCredentials('openProjectApi');
@@ -266,42 +256,14 @@ class OpenProject {
             const operation = this.getNodeParameter('operation', i);
             // ─── PROJECTS ───────────────────────────────────────────────
             if (resource === 'project') {
-                if (operation === 'getAll') {
-                    const response = await this.helpers.httpRequestWithAuthentication.call(this, 'openProjectApi', { method: 'GET', url: `${baseUrl}/projects`, json: true });
-                    const projects = (_b = (_a = response._embedded) === null || _a === void 0 ? void 0 : _a.elements) !== null && _b !== void 0 ? _b : [];
-                    returnData.push(...projects);
-                }
-                else if (operation === 'get') {
-                    const id = this.getNodeParameter('id', i);
-                    const response = await this.helpers.httpRequestWithAuthentication.call(this, 'openProjectApi', { method: 'GET', url: `${baseUrl}/projects/${id}/activities`, json: true });
-                    returnData.push(response);
-                }
-                else if (operation === 'create') {
-                    const name = this.getNodeParameter('name', i);
-                    const identifier = this.getNodeParameter('identifier', i);
-                    const additionalFields = this.getNodeParameter('additionalFields', i);
-                    const body = { name, identifier, ...additionalFields };
-                    const response = await this.helpers.httpRequestWithAuthentication.call(this, 'openProjectApi', { method: 'POST', url: `${baseUrl}/projects`, body, json: true });
-                    returnData.push(response);
-                }
-                else if (operation === 'update') {
-                    const id = this.getNodeParameter('id', i);
-                    const additionalFields = this.getNodeParameter('additionalFields', i);
-                    const response = await this.helpers.httpRequestWithAuthentication.call(this, 'openProjectApi', { method: 'PATCH', url: `${baseUrl}/projects/${id}`, body: additionalFields, json: true });
-                    returnData.push(response);
-                }
-                else if (operation === 'delete') {
-                    const id = this.getNodeParameter('id', i);
-                    await this.helpers.httpRequestWithAuthentication.call(this, 'openProjectApi', { method: 'DELETE', url: `${baseUrl}/projects/${id}`, json: true });
-                    returnData.push({ success: true, id });
-                }
             }
             // ─── WORK PACKAGES ──────────────────────────────────────────
             else if (resource === 'workPackage') {
                 if (operation === 'getFiltered') {
-                    const projectId = this.getNodeParameter('projectId', i, '');
+                    const projectId = this.getNodeParameter('projectId', i, '', {
+                        extractValue: true,
+                    });
                     const filterParams = this.getNodeParameter('filters', i, {});
-                    console.log(filterParams);
                     // const opts = this.getNodeParameter('additionalOptions', i, {}) as Record<string, any>;
                     // Build the filters array for OpenProject API
                     const filters = [];
@@ -347,101 +309,15 @@ class OpenProject {
                     const endpoint = projectId
                         ? `/projects/${projectId}/work_packages`
                         : '/work_packages';
-                    console.log("endpoint", endpoint);
-                    console.log("qs", qs.filters);
                     // console.log("values", qs.filters[0].status.values);
                     const response = await this.helpers.httpRequestWithAuthentication.call(this, 'openProjectApi', { method: 'GET', url: `${baseUrl}/${endpoint}`, json: true, qs });
-                    console.log("response", response);
-                    const workPackages = (_d = (_c = response._embedded) === null || _c === void 0 ? void 0 : _c.elements) !== null && _d !== void 0 ? _d : [];
+                    const workPackages = (_b = (_a = response._embedded) === null || _a === void 0 ? void 0 : _a.elements) !== null && _b !== void 0 ? _b : [];
                     returnData.push(...workPackages.map((wp) => ({ json: wp })));
                 }
                 else if (operation === 'get') {
                     const id = this.getNodeParameter('id', i);
                     const response = await this.helpers.httpRequestWithAuthentication.call(this, 'openProjectApi', { method: 'GET', url: `${baseUrl}/work_packages/${id}`, json: true });
-                    const result = FilterWorkPackages(response);
-                    returnData.push(result);
-                }
-                else if (operation === 'create') {
-                    const projectId = this.getNodeParameter('projectId', i);
-                    const subject = this.getNodeParameter('subject', i);
-                    const additionalFields = this.getNodeParameter('additionalFields', i);
-                    const body = { subject };
-                    if (additionalFields.description) {
-                        body.description = { raw: additionalFields.description };
-                    }
-                    if (additionalFields.assigneeId) {
-                        body._links = { assignee: { href: `/api/v3/users/${additionalFields.assigneeId}` } };
-                    }
-                    if (additionalFields.dueDate)
-                        body.dueDate = additionalFields.dueDate;
-                    if (additionalFields.startDate)
-                        body.startDate = additionalFields.startDate;
-                    if (additionalFields.estimatedHours)
-                        body.estimatedTime = `PT${additionalFields.estimatedHours}H`;
-                    const response = await this.helpers.httpRequestWithAuthentication.call(this, 'openProjectApi', { method: 'POST', url: `${baseUrl}/projects/${projectId}/work_packages`, body, json: true });
                     returnData.push(response);
-                }
-                else if (operation === 'update') {
-                    const id = this.getNodeParameter('id', i);
-                    const additionalFields = this.getNodeParameter('additionalFields', i);
-                    const response = await this.helpers.httpRequestWithAuthentication.call(this, 'openProjectApi', { method: 'PATCH', url: `${baseUrl}/work_packages/${id}`, body: additionalFields, json: true });
-                    returnData.push(response);
-                }
-                else if (operation === 'delete') {
-                    const id = this.getNodeParameter('id', i);
-                    await this.helpers.httpRequestWithAuthentication.call(this, 'openProjectApi', { method: 'DELETE', url: `${baseUrl}/work_packages/${id}`, json: true });
-                    returnData.push({ success: true, id });
-                }
-            }
-            // ─── TIME ENTRIES ────────────────────────────────────────────
-            else if (resource === 'timeEntry') {
-                if (operation === 'getAll') {
-                    const response = await this.helpers.httpRequestWithAuthentication.call(this, 'openProjectApi', { method: 'GET', url: `${baseUrl}/time_entries`, json: true });
-                    const entries = (_f = (_e = response._embedded) === null || _e === void 0 ? void 0 : _e.elements) !== null && _f !== void 0 ? _f : [];
-                    returnData.push(...entries);
-                }
-                else if (operation === 'get') {
-                    const id = this.getNodeParameter('id', i);
-                    const response = await this.helpers.httpRequestWithAuthentication.call(this, 'openProjectApi', { method: 'GET', url: `${baseUrl}/time_entries/${id}`, json: true });
-                    returnData.push(response);
-                }
-                else if (operation === 'create') {
-                    const workPackageId = this.getNodeParameter('workPackageId', i);
-                    const hours = this.getNodeParameter('hours', i);
-                    const spentOn = this.getNodeParameter('spentOn', i);
-                    const additionalFields = this.getNodeParameter('additionalFields', i);
-                    const body = {
-                        hours: `PT${hours}H`,
-                        spentOn,
-                        _links: {
-                            workPackage: { href: `/api/v3/work_packages/${workPackageId}` },
-                        },
-                    };
-                    if (additionalFields.comment) {
-                        body.comment = { raw: additionalFields.comment };
-                    }
-                    const response = await this.helpers.httpRequestWithAuthentication.call(this, 'openProjectApi', { method: 'POST', url: `${baseUrl}/time_entries`, body, json: true });
-                    returnData.push(response);
-                }
-                else if (operation === 'update') {
-                    const id = this.getNodeParameter('id', i);
-                    const hours = this.getNodeParameter('hours', i);
-                    const spentOn = this.getNodeParameter('spentOn', i);
-                    const additionalFields = this.getNodeParameter('additionalFields', i);
-                    const body = {
-                        hours: `PT${hours}H`,
-                        spentOn,
-                    };
-                    if (additionalFields.comment) {
-                        body.comment = { raw: additionalFields.comment };
-                    }
-                    const response = await this.helpers.httpRequestWithAuthentication.call(this, 'openProjectApi', { method: 'PATCH', url: `${baseUrl}/time_entries/${id}`, body, json: true });
-                    returnData.push(response);
-                }
-                else if (operation === 'delete') {
-                    const id = this.getNodeParameter('id', i);
-                    await this.helpers.httpRequestWithAuthentication.call(this, 'openProjectApi', { method: 'DELETE', url: `${baseUrl}/time_entries/${id}`, json: true });
-                    returnData.push({ success: true, id });
                 }
             }
         }
@@ -449,9 +325,4 @@ class OpenProject {
     }
 }
 exports.OpenProject = OpenProject;
-function FilterWorkPackages(response) {
-    var _a, _b;
-    const workPackages = (_b = (_a = response._embedded) === null || _a === void 0 ? void 0 : _a.elements) !== null && _b !== void 0 ? _b : [];
-    return workPackages.map((wp) => ({ json: wp }));
-}
 //# sourceMappingURL=OpenProject.node.js.map
