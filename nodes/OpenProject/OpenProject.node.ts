@@ -4,6 +4,7 @@ import {
     INodeType,
     INodeTypeDescription,
     IDataObject,
+    INodePropertyOptions,
 } from 'n8n-workflow';
 
 export class OpenProject implements INodeType {
@@ -33,29 +34,29 @@ export class OpenProject implements INodeType {
                 type: 'options',
                 noDataExpression: true,
                 options: [
-                    { name: 'Project', value: 'project' },
+                    // { name: 'Project', value: 'project' },
                     { name: 'Work Package', value: 'workPackage' },
-                    { name: 'Time Entry', value: 'timeEntry' },
+                    // { name: 'Time Entry', value: 'timeEntry' },
                 ],
                 default: 'project',
             },
 
             // ─── PROJECT OPERATIONS ──────────────────────────────────────
-            {
-                displayName: 'Operation',
-                name: 'operation',
-                type: 'options',
-                noDataExpression: true,
-                displayOptions: { show: { resource: ['project'] } },
-                options: [
-                    { name: 'Create', value: 'create', action: 'Create a project' },
-                    { name: 'Get', value: 'get', action: 'Get a project' },
-                    { name: 'Get All', value: 'getAll', action: 'Get all projects' },
-                    { name: 'Update', value: 'update', action: 'Update a project' },
-                    { name: 'Delete', value: 'delete', action: 'Delete a project' },
-                ],
-                default: 'getAll',
-            },
+            // {
+            //     displayName: 'Operation',
+            //     name: 'operation',
+            //     type: 'options',
+            //     noDataExpression: true,
+            //     displayOptions: { show: { resource: ['project'] } },
+            //     options: [
+            //         { name: 'Create', value: 'create', action: 'Create a project' },
+            //         { name: 'Get', value: 'get', action: 'Get a project' },
+            //         { name: 'Get All', value: 'getAll', action: 'Get all projects' },
+            //         { name: 'Update', value: 'update', action: 'Update a project' },
+            //         { name: 'Delete', value: 'delete', action: 'Delete a project' },
+            //     ],
+            //     default: 'getAll',
+            // },
 
             // ─── WORK PACKAGE OPERATIONS ─────────────────────────────────
             {
@@ -65,31 +66,31 @@ export class OpenProject implements INodeType {
                 noDataExpression: true,
                 displayOptions: { show: { resource: ['workPackage'] } },
                 options: [
-                    { name: 'Create', value: 'create', action: 'Create a work package' },
+                    // { name: 'Create', value: 'create', action: 'Create a work package' },
                     { name: 'Get', value: 'get', action: 'Get a work package' },
-                    { name: 'Get All', value: 'getAll', action: 'Get all work packages' },
-                    { name: 'Update', value: 'update', action: 'Update a work package' },
-                    { name: 'Delete', value: 'delete', action: 'Delete a work package' },
+                    { name: 'Get Filtered', value: 'getFiltered', action: 'Get filtered work packages' },
+                    // { name: 'Update', value: 'update', action: 'Update a work package' },
+                    // { name: 'Delete', value: 'delete', action: 'Delete a work package' },
                 ],
-                default: 'getAll',
+                default: 'get',
             },
 
             // ─── TIME ENTRY OPERATIONS ───────────────────────────────────
-            {
-                displayName: 'Operation',
-                name: 'operation',
-                type: 'options',
-                noDataExpression: true,
-                displayOptions: { show: { resource: ['timeEntry'] } },
-                options: [
-                    { name: 'Create', value: 'create', action: 'Create a time entry' },
-                    { name: 'Get', value: 'get', action: 'Get a time entry' },
-                    { name: 'Get All', value: 'getAll', action: 'Get all time entries' },
-                    { name: 'Update', value: 'update', action: 'Update a time entry' },
-                    { name: 'Delete', value: 'delete', action: 'Delete a time entry' },
-                ],
-                default: 'getAll',
-            },
+            // {
+            //     displayName: 'Operation',
+            //     name: 'operation',
+            //     type: 'options',
+            //     noDataExpression: true,
+            //     displayOptions: { show: { resource: ['timeEntry'] } },
+            //     options: [
+            //         { name: 'Create', value: 'create', action: 'Create a time entry' },
+            //         { name: 'Get', value: 'get', action: 'Get a time entry' },
+            //         { name: 'Get All', value: 'getAll', action: 'Get all time entries' },
+            //         { name: 'Update', value: 'update', action: 'Update a time entry' },
+            //         { name: 'Delete', value: 'delete', action: 'Delete a time entry' },
+            //     ],
+            //     default: 'getAll',
+            // },
 
             // ─── SHARED: ID FIELD ────────────────────────────────────────
             {
@@ -100,208 +101,209 @@ export class OpenProject implements INodeType {
                 required: true,
                 displayOptions: {
                     show: {
-                        operation: ['get', 'update', 'delete'],
+                        operation: ['get',
+                            //  'update', 'delete'
+                            ],
                     },
                 },
                 description: 'The ID of the resource',
             },
 
             // ─── PROJECT FIELDS ──────────────────────────────────────────
-            {
-                displayName: 'Name',
-                name: 'name',
-                type: 'string',
-                default: '',
-                required: true,
-                displayOptions: {
-                    show: { resource: ['project'], operation: ['create'] },
-                },
-                description: 'Name of the project',
-            },
-            {
-                displayName: 'Identifier',
-                name: 'identifier',
-                type: 'string',
-                default: '',
-                required: true,
-                displayOptions: {
-                    show: { resource: ['project'], operation: ['create'] },
-                },
-                description: 'Unique identifier/slug for the project (e.g. my-project)',
-            },
-            {
-                displayName: 'Additional Fields',
-                name: 'additionalFields',
-                type: 'collection',
-                placeholder: 'Add Field',
-                default: {},
-                displayOptions: {
-                    show: { resource: ['project'], operation: ['create', 'update'] },
-                },
-                options: [
-                    {
-                        displayName: 'Description',
-                        name: 'description',
-                        type: 'string',
-                        default: '',
-                        typeOptions: { rows: 3 },
-                    },
-                    {
-                        displayName: 'Public',
-                        name: 'public',
-                        type: 'boolean',
-                        default: false,
-                    },
-                    {
-                        displayName: 'Status',
-                        name: 'status',
-                        type: 'options',
-                        options: [
-                            { name: 'Active', value: 'active' },
-                            { name: 'Off Track', value: 'off_track' },
-                            { name: 'At Risk', value: 'at_risk' },
-                            { name: 'On Track', value: 'on_track' },
-                        ],
-                        default: 'active',
-                    },
-                ],
-            },
+            // {
+            //     displayName: 'Name',
+            //     name: 'name',
+            //     type: 'string',
+            //     default: '',
+            //     required: true,
+            //     displayOptions: {
+            //         show: { resource: ['project'], operation: ['create'] },
+            //     },
+            //     description: 'Name of the project',
+            // },
+            // {
+            //     displayName: 'Identifier',
+            //     name: 'identifier',
+            //     type: 'string',
+            //     default: '',
+            //     required: true,
+            //     displayOptions: {
+            //         show: { resource: ['project'], operation: ['create'] },
+            //     },
+            //     description: 'Unique identifier/slug for the project (e.g. my-project)',
+            // },
+            // {
+            //     displayName: 'Additional Fields',
+            //     name: 'additionalFields',
+            //     type: 'collection',
+            //     placeholder: 'Add Field',
+            //     default: {},
+            //     displayOptions: {
+            //         show: { resource: ['project'], operation: ['create', 'update'] },
+            //     },
+            //     options: [
+            //         {
+            //             displayName: 'Description',
+            //             name: 'description',
+            //             type: 'string',
+            //             default: '',
+            //             typeOptions: { rows: 3 },
+            //         },
+            //         {
+            //             displayName: 'Public',
+            //             name: 'public',
+            //             type: 'boolean',
+            //             default: false,
+            //         },
+            //         {
+            //             displayName: 'Status',
+            //             name: 'status',
+            //             type: 'options',
+            //             options: [
+            //                 { name: 'Active', value: 'active' },
+            //                 { name: 'Off Track', value: 'off_track' },
+            //                 { name: 'At Risk', value: 'at_risk' },
+            //                 { name: 'On Track', value: 'on_track' },
+            //             ],
+            //             default: 'active',
+            //         },
+            //     ],
+            // },
 
             // ─── WORK PACKAGE FIELDS ─────────────────────────────────────
-            {
-                displayName: 'Project ID',
-                name: 'projectId',
-                type: 'string',
-                default: '',
-                required: true,
-                displayOptions: {
-                    show: { resource: ['workPackage'], operation: ['create', 'getAll'] },
+                {
+                    displayName: 'Project ID',
+                    name: 'projectId',
+                    type: 'options',
+                    default: '',
+                    required: true,
+                    displayOptions: {
+                        show: { resource: ['workPackage'], operation: ['getFiltered'] },
+                    },
+                    description: 'The ID of the project to get work packages from',
+                    typeOptions: {
+                        loadOptionsMethod: 'getProjects',
+                    },
                 },
-                description: 'The ID of the project this work package belongs to',
-            },
-            {
-                displayName: 'Subject',
-                name: 'subject',
-                type: 'string',
-                default: '',
-                required: true,
-                displayOptions: {
-                    show: { resource: ['workPackage'], operation: ['create'] },
+                {
+                    displayName: 'Filters',
+                    name: 'filters',
+                    type: 'collection',
+                    placeholder: 'Add Filter',
+                    default: {},
+                    displayOptions: {
+                        show: { resource: ['workPackage'], operation: ['getFiltered'] },
+                    },
+                    options: [
+                        {
+                            displayName: 'Status',
+                            name: 'status_id',
+                            type: 'options',
+                            options: [
+                                { name: 'Bugs Treatment',         value: '45' },
+                                { name: 'In Progress', value: '47' },
+                                { name: 'Closed',      value: '56' },
+                                { name: 'Rejected',    value: '15' },
+                                { name: 'Open',         value: '60' },
+                                { name: 'Product Confirmation',         value: '65' },
+                                { name: 'Resolved on LIVE',         value: '67' },
+                                { name: 'To Do',         value: '1' },
+                              ],
+                            default: '',
+                        },
+                    ],
                 },
-                description: 'Title/subject of the work package',
-            },
-            {
-                displayName: 'Additional Fields',
-                name: 'additionalFields',
-                type: 'collection',
-                placeholder: 'Add Field',
-                default: {},
-                displayOptions: {
-                    show: { resource: ['workPackage'], operation: ['create', 'update'] },
-                },
-                options: [
-                    {
-                        displayName: 'Description',
-                        name: 'description',
-                        type: 'string',
-                        default: '',
-                        typeOptions: { rows: 3 },
+                {
+                    displayName: 'Assignee',
+                    name: 'assignee',
+                    type: 'options',
+                    default: '',
+                    required: false,
+                    displayOptions: {
+                        show: { resource: ['workPackage'], operation: ['getFiltered'] },
                     },
-                    {
-                        displayName: 'Assignee ID',
-                        name: 'assigneeId',
-                        type: 'string',
-                        default: '',
-                        description: 'User ID to assign the work package to',
+                    typeOptions: {
+                        loadOptionsMethod: 'getUsers',
+                        loadOptionsDependsOn: ['projectId'],
                     },
-                    {
-                        displayName: 'Due Date',
-                        name: 'dueDate',
-                        type: 'dateTime',
-                        default: '',
-                    },
-                    {
-                        displayName: 'Start Date',
-                        name: 'startDate',
-                        type: 'dateTime',
-                        default: '',
-                    },
-                    {
-                        displayName: 'Estimated Hours',
-                        name: 'estimatedHours',
-                        type: 'number',
-                        default: 0,
-                    },
-                    {
-                        displayName: 'Priority',
-                        name: 'priority',
-                        type: 'options',
-                        options: [
-                            { name: 'Low', value: 'low' },
-                            { name: 'Normal', value: 'normal' },
-                            { name: 'High', value: 'high' },
-                            { name: 'Immediate', value: 'immediate' },
-                        ],
-                        default: 'normal',
-                    },
-                ],
-            },
+                    description: 'The ID of the assignee to get work packages from',
+                }
 
             // ─── TIME ENTRY FIELDS ───────────────────────────────────────
-            {
-                displayName: 'Work Package ID',
-                name: 'workPackageId',
-                type: 'string',
-                default: '',
-                required: true,
-                displayOptions: {
-                    show: { resource: ['timeEntry'], operation: ['create'] },
-                },
-                description: 'The ID of the work package to log time against',
-            },
-            {
-                displayName: 'Hours',
-                name: 'hours',
-                type: 'number',
-                default: 1,
-                required: true,
-                displayOptions: {
-                    show: { resource: ['timeEntry'], operation: ['create', 'update'] },
-                },
-                description: 'Number of hours to log',
-            },
-            {
-                displayName: 'Spent On (Date)',
-                name: 'spentOn',
-                type: 'dateTime',
-                default: '',
-                required: true,
-                displayOptions: {
-                    show: { resource: ['timeEntry'], operation: ['create', 'update'] },
-                },
-                description: 'The date the time was spent',
-            },
-            {
-                displayName: 'Additional Fields',
-                name: 'additionalFields',
-                type: 'collection',
-                placeholder: 'Add Field',
-                default: {},
-                displayOptions: {
-                    show: { resource: ['timeEntry'], operation: ['create', 'update'] },
-                },
-                options: [
-                    {
-                        displayName: 'Comment',
-                        name: 'comment',
-                        type: 'string',
-                        default: '',
-                        typeOptions: { rows: 2 },
-                    },
-                ],
-            },
+            // {
+            //     displayName: 'Work Package ID',
+            //     name: 'workPackageId',
+            //     type: 'string',
+            //     default: '',
+            //     required: true,
+            //     displayOptions: {
+            //         show: { resource: ['timeEntry'], operation: ['create'] },
+            //     },
+            //     description: 'The ID of the work package to log time against',
+            // },
+            // {
+            //     displayName: 'Hours',
+            //     name: 'hours',
+            //     type: 'number',
+            //     default: 1,
+            //     required: true,
+            //     displayOptions: {
+            //         show: { resource: ['timeEntry'], operation: ['create', 'update'] },
+            //     },
+            //     description: 'Number of hours to log',
+            // },
+            // {
+            //     displayName: 'Spent On (Date)',
+            //     name: 'spentOn',
+            //     type: 'dateTime',
+            //     default: '',
+            //     required: true,
+            //     displayOptions: {
+            //         show: { resource: ['timeEntry'], operation: ['create', 'update'] },
+            //     },
+            //     description: 'The date the time was spent',
+            // },
+            // {
+            //     displayName: 'Additional Fields',
+            //     name: 'additionalFields',
+            //     type: 'collection',
+            //     placeholder: 'Add Field',
+            //     default: {},
+            //     displayOptions: {
+            //         show: { resource: ['timeEntry'], operation: ['create', 'update'] },
+            //     },
+            //     options: [
+            //         {
+            //             displayName: 'Comment',
+            //             name: 'comment',
+            //             type: 'string',
+            //             default: '',
+            //             typeOptions: { rows: 2 },
+            //         },
+            //     ],
+            // },
         ],
     };
+
+    async getProjects(this: IExecuteFunctions): Promise<INodePropertyOptions[]> {
+        const credentials = await this.getCredentials('openProjectApi');
+        const baseUrl = `${credentials.baseUrl}/api/v3`;
+        const response = await this.helpers.httpRequestWithAuthentication.call(
+            this, 'openProjectApi',
+            { method: 'GET', url: `${baseUrl}/projects`, json: true },
+        );
+        return response._embedded?.elements.map((project: any) => ({ name: project.name, value: project.id })) ?? [];
+    }
+
+    async getUsers(this: IExecuteFunctions): Promise<INodePropertyOptions[]> {
+        const credentials = await this.getCredentials('openProjectApi');
+        const baseUrl = `${credentials.baseUrl}/api/v3`;
+        const response = await this.helpers.httpRequestWithAuthentication.call(
+            this, 'openProjectApi',
+            { method: 'GET', url: `${baseUrl}/users`, json: true },
+        );
+        return response._embedded?.elements.map((user: any) => ({ name: user.name, value: user.id })) ?? [];
+    }
 
     async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
         const items = this.getInputData();
@@ -363,54 +365,79 @@ export class OpenProject implements INodeType {
 
             // ─── WORK PACKAGES ──────────────────────────────────────────
             else if (resource === 'workPackage') {
-                if (operation === 'getAll') {
-                    const projectId = this.getNodeParameter('projectId', i) as string;
+                if (operation === 'getFiltered') {
+                    const projectId = this.getNodeParameter('projectId', i, '') as string;
+                    const filterParams = this.getNodeParameter('filters', i, {}) as Record<string, any>;
+                    console.log(filterParams);
+                    // const opts = this.getNodeParameter('additionalOptions', i, {}) as Record<string, any>;
+                  
+                    // Build the filters array for OpenProject API
+                    const filters: Array<Record<string, any>> = [];
+                  
+                    // Multi-value filters (operator "=")
+                    const statusValues = filterParams.status_id as string[] | string | undefined;
+                    if (statusValues && (Array.isArray(statusValues) ? statusValues.length > 0 : statusValues !== '')) {
+                    const values = Array.isArray(statusValues) ? statusValues : [statusValues];
+                    filters.push({ status: { operator: '=', values } });
+                    }
+                  
+                    // Single-value ID filters
+                    // const singleIdFilters = ['author_id', 'assigned_to_id', 'version_id', 'category_id'];
+                    // for (const field of singleIdFilters) {
+                    //   const val = filterParams[field] as string | undefined;
+                    //   if (val) {
+                    //     filters.push({ [field]: { operator: '=', values: [val] } });
+                    //   }
+                    // }
+                  
+                    // Subject contains
+                    // if (filterParams.subject) {
+                    //   filters.push({ subject: { operator: '**', values: [filterParams.subject] } });
+                    // }
+                  
+                    // Date filters
+                    // if (filterParams.created_at_after) {
+                    //   filters.push({ created_at: { operator: '>d', values: [filterParams.created_at_after] } });
+                    // }
+                    // if (filterParams.created_at_before) {
+                    //   filters.push({ created_at: { operator: '<d', values: [filterParams.created_at_before] } });
+                    // }
+                    // if (filterParams.updated_at_after) {
+                    //   filters.push({ updated_at: { operator: '>d', values: [filterParams.updated_at_after] } });
+                    // }
+                    // if (filterParams.due_date_before) {
+                    //   filters.push({ due_date: { operator: '<d', values: [filterParams.due_date_before] } });
+                    // }
+                  
+                    // Build query string
+                    const qs: Record<string, any> = {};
+                    if (filters.length) qs.filters = JSON.stringify(filters);
+                    // if (opts.pageSize)  qs.pageSize = opts.pageSize;
+                    // if (opts.offset)    qs.offset   = opts.offset;
+                    // if (opts.sortBy)    qs.sortBy   = JSON.stringify([[opts.sortBy, opts.sortDir ?? 'desc']]);
+                  
+                    // Choose endpoint: project-scoped or global
+                    const endpoint = projectId
+                      ? `/projects/${projectId}/work_packages`
+                      : '/work_packages';
+                    console.log("endpoint", endpoint);
+                    console.log("qs", qs.filters);
+                    // console.log("values", qs.filters[0].status.values);
                     const response = await this.helpers.httpRequestWithAuthentication.call(
                         this, 'openProjectApi',
-                        { method: 'GET', url: `${baseUrl}/projects/${projectId}/work_packages`, json: true },
+                        { method: 'GET', url: `${baseUrl}/${endpoint}`, json: true, qs },
                     );
+                    console.log("response", response);
                     const workPackages = response._embedded?.elements ?? [];
-                    returnData.push(...workPackages);
-
+                    returnData.push(...workPackages.map((wp: any) => ({ json: wp })));
                 } else if (operation === 'get') {
                     const id = this.getNodeParameter('id', i) as string;
                     const response = await this.helpers.httpRequestWithAuthentication.call(
                         this, 'openProjectApi',
                         { method: 'GET', url: `${baseUrl}/work_packages/${id}`, json: true },
                     );
-
-                    const result: IDataObject = {
-                        // Core
-                        id: response.id,
-                        subject: response.subject,
-                        percentageDone: response.percentageDone,
-                        startDate: response.startDate,
-                        dueDate: response.dueDate,
-                        estimatedTime: response.estimatedTime,
-                        spentTime: response.spentTime,
-                        createdAt: response.createdAt,
-                        updatedAt: response.updatedAt,
-
-                        // Flattened from _links
-                        statusName: response._links?.status?.title,
-                        typeName: response._links?.type?.title,
-                        priorityName: response._links?.priority?.title,
-                        projectName: response._links?.project?.title,
-                        categoryName: response._links?.category?.title,
-                        versionName: response._links?.version?.title,
-                        assigneeName: response._links?.assignee?.title,
-                        responsibleName: response._links?.responsible?.title,
-                        authorName: response._links?.author?.title,
-
-                        // IDs for further API calls
-                        statusId: response._embedded?.status?.id,
-                        assigneeId: response._embedded?.assignee?.id,
-                        responsibleId: response._embedded?.responsible?.id,
-                        projectId: response._embedded?.project?.id,
-                        isClosed: response._embedded?.status?.isClosed,
-                    };
-
-                    returnData.push(result);
+                    
+                    returnData.push(response);
 
                 } else if (operation === 'create') {
                     const projectId = this.getNodeParameter('projectId', i) as string;
