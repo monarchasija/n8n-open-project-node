@@ -2,6 +2,7 @@ import {
     IExecuteFunctions,
     ILoadOptionsFunctions,
     INodeExecutionData,
+    INodePropertyOptions,
     INodeType,
     INodeTypeDescription,
     IDataObject,
@@ -274,6 +275,45 @@ export class OpenProject implements INodeType {
 
                 results.sort((a, b) => a.name.localeCompare(b.name));
                 return { results };
+            },
+        },
+    };
+
+    methods = {
+        loadOptions: {
+            async getProjects(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+                const credentials = await this.getCredentials('openProjectApi');
+                const baseUrl = `${credentials.baseUrl}/api/v3`;
+                const response = await this.helpers.httpRequestWithAuthentication.call(
+                    this, 'openProjectApi',
+                    { method: 'GET', url: `${baseUrl}/projects`, json: true },
+                );
+                const projects: IDataObject[] = (response._embedded?.elements ?? []) as IDataObject[];
+                return projects.map((project: IDataObject): INodePropertyOptions => ({
+                    name: project.name as string,
+                    value: String(project.id),
+                }));
+            },
+
+            async getProjectMembers(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+                const credentials = await this.getCredentials('openProjectApi');
+                const baseUrl = `${credentials.baseUrl}/api/v3`;
+                const projectId = this.getCurrentNodeParameter('projectId') as string;
+                if (!projectId) return [];
+                const response = await this.helpers.httpRequestWithAuthentication.call(
+                    this, 'openProjectApi',
+                    { method: 'GET', url: `${baseUrl}/projects/${projectId}/memberships`, json: true },
+                );
+                const memberships: IDataObject[] = (response._embedded?.elements ?? []) as IDataObject[];
+                return memberships.map((membership: IDataObject): INodePropertyOptions => {
+                    const principal = (membership._links as IDataObject)?.principal as IDataObject;
+                    const href = principal?.href as string ?? '';
+                    const userId = href.split('/').pop() ?? '';
+                    return {
+                        name: principal?.title as string ?? userId,
+                        value: userId,
+                    };
+                });
             },
         },
     };
