@@ -35,29 +35,15 @@ export class OpenProject implements INodeType {
                 type: 'options',
                 noDataExpression: true,
                 options: [
-                    { name: 'Project', value: 'project' },
+                    // { name: 'Project', value: 'project' },
                     { name: 'Work Package', value: 'workPackage' },
-                    { name: 'Time Entry', value: 'timeEntry' },
+                    // { name: 'Time Entry', value: 'timeEntry' },
                 ],
                 default: 'project',
             },
 
             // ─── PROJECT OPERATIONS ──────────────────────────────────────
-            {
-                displayName: 'Operation',
-                name: 'operation',
-                type: 'options',
-                noDataExpression: true,
-                displayOptions: { show: { resource: ['project'] } },
-                options: [
-                    { name: 'Create', value: 'create', action: 'Create a project' },
-                    { name: 'Get', value: 'get', action: 'Get a project' },
-                    { name: 'Get All', value: 'getAll', action: 'Get all projects' },
-                    { name: 'Update', value: 'update', action: 'Update a project' },
-                    { name: 'Delete', value: 'delete', action: 'Delete a project' },
-                ],
-                default: 'getAll',
-            },
+
 
             // ─── WORK PACKAGE OPERATIONS ─────────────────────────────────
             {
@@ -67,32 +53,17 @@ export class OpenProject implements INodeType {
                 noDataExpression: true,
                 displayOptions: { show: { resource: ['workPackage'] } },
                 options: [
-                    { name: 'Create', value: 'create', action: 'Create a work package' },
+                    // { name: 'Create', value: 'create', action: 'Create a work package' },
                     { name: 'Get', value: 'get', action: 'Get a work package' },
-                    { name: 'Get All', value: 'getAll', action: 'Get all work packages' },
                     { name: 'Get Filtered', value: 'getFiltered', action: 'Get filtered work packages' },
-                    { name: 'Update', value: 'update', action: 'Update a work package' },
-                    { name: 'Delete', value: 'delete', action: 'Delete a work package' },
+                    // { name: 'Update', value: 'update', action: 'Update a work package' },
+                    // { name: 'Delete', value: 'delete', action: 'Delete a work package' },
                 ],
-                default: 'getAll',
+                default: 'get',
             },
 
             // ─── TIME ENTRY OPERATIONS ───────────────────────────────────
-            {
-                displayName: 'Operation',
-                name: 'operation',
-                type: 'options',
-                noDataExpression: true,
-                displayOptions: { show: { resource: ['timeEntry'] } },
-                options: [
-                    { name: 'Create', value: 'create', action: 'Create a time entry' },
-                    { name: 'Get', value: 'get', action: 'Get a time entry' },
-                    { name: 'Get All', value: 'getAll', action: 'Get all time entries' },
-                    { name: 'Update', value: 'update', action: 'Update a time entry' },
-                    { name: 'Delete', value: 'delete', action: 'Delete a time entry' },
-                ],
-                default: 'getAll',
-            },
+
 
             // ─── SHARED: ID FIELD ────────────────────────────────────────
             {
@@ -103,328 +74,181 @@ export class OpenProject implements INodeType {
                 required: true,
                 displayOptions: {
                     show: {
-                        operation: ['get', 'update', 'delete'],
+                        operation: ['get',
+                            //  'update', 'delete'
+                            ],
                     },
                 },
                 description: 'The ID of the resource',
             },
 
-            // ─── PROJECT FIELDS ──────────────────────────────────────────
-            {
-                displayName: 'Name',
-                name: 'name',
-                type: 'string',
-                default: '',
-                required: true,
-                displayOptions: {
-                    show: { resource: ['project'], operation: ['create'] },
-                },
-                description: 'Name of the project',
-            },
-            {
-                displayName: 'Identifier',
-                name: 'identifier',
-                type: 'string',
-                default: '',
-                required: true,
-                displayOptions: {
-                    show: { resource: ['project'], operation: ['create'] },
-                },
-                description: 'Unique identifier/slug for the project (e.g. my-project)',
-            },
-            {
-                displayName: 'Additional Fields',
-                name: 'additionalFields',
-                type: 'collection',
-                placeholder: 'Add Field',
-                default: {},
-                displayOptions: {
-                    show: { resource: ['project'], operation: ['create', 'update'] },
-                },
-                options: [
-                    {
-                        displayName: 'Description',
-                        name: 'description',
-                        type: 'string',
-                        default: '',
-                        typeOptions: { rows: 3 },
-                    },
-                    {
-                        displayName: 'Public',
-                        name: 'public',
-                        type: 'boolean',
-                        default: false,
-                    },
-                    {
-                        displayName: 'Status',
-                        name: 'status',
-                        type: 'options',
-                        options: [
-                            { name: 'Active', value: 'active' },
-                            { name: 'Off Track', value: 'off_track' },
-                            { name: 'At Risk', value: 'at_risk' },
-                            { name: 'On Track', value: 'on_track' },
-                        ],
-                        default: 'active',
-                    },
-                ],
-            },
 
             // ─── WORK PACKAGE FIELDS ─────────────────────────────────────
-            {
-                displayName: 'Project',
-                name: 'projectId',
-                type: 'options',
-                typeOptions: { loadOptionsMethod: 'getProjects' },
-                default: '',
-                required: true,
-                displayOptions: {
-                    show: { resource: ['workPackage'], operation: ['create', 'getAll'] },
-                },
-                description: 'The project this work package belongs to',
-            },
-
-            // ─── GET FILTERED FIELDS ─────────────────────────────────────
-            {
-                displayName: 'Project',
-                name: 'projectId',
-                type: 'options',
-                typeOptions: { loadOptionsMethod: 'getProjects' },
-                default: '',
-                required: true,
-                displayOptions: {
-                    show: { resource: ['workPackage'], operation: ['getFiltered'] },
-                },
-                description: 'The project to fetch work packages from',
-            },
-            {
-                displayName: 'Assignee Input Method',
-                name: 'assigneeInputMethod',
-                type: 'options',
-                options: [
-                    { name: 'None', value: 'none' },
-                    { name: 'Enter ID Manually', value: 'manual' },
-                    { name: 'Select from Project Members', value: 'select' },
-                ],
-                default: 'none',
-                displayOptions: {
-                    show: { resource: ['workPackage'], operation: ['getFiltered'] },
-                },
-            },
-            {
-                displayName: 'Assignee ID',
-                name: 'assigneeId',
-                type: 'string',
-                default: '',
-                displayOptions: {
-                    show: {
-                        resource: ['workPackage'],
-                        operation: ['getFiltered'],
-                        assigneeInputMethod: ['manual'],
+                {
+                    displayName: 'Project',
+                    name: 'projectId',
+                    type: 'resourceLocator',
+                    default: {},
+                    required: true,
+                    displayOptions: {
+                        show: { resource: ['workPackage'], operation: ['getFiltered'] },
                     },
+                    description: 'The project to get work packages from',
+                    modes: [
+                        {
+                            displayName: 'From List',
+                            name: 'list',
+                            type: 'list',
+                            placeholder: 'Search projects…',
+                            typeOptions: {
+                                searchListMethod: 'searchProjects',
+                                searchable: true,
+                                searchFilterRequired: false,
+                            },
+                        },
+                        
+                    ],
                 },
-                description: 'User ID of the assignee to filter by',
-            },
-            {
-                displayName: 'Assignee',
-                name: 'assigneeSelected',
-                type: 'options',
-                typeOptions: {
-                    loadOptionsMethod: 'getProjectMembers',
-                    loadOptionsDependsOn: ['projectId'],
-                },
-                default: '',
-                displayOptions: {
-                    show: {
-                        resource: ['workPackage'],
-                        operation: ['getFiltered'],
-                        assigneeInputMethod: ['select'],
+                {
+                    displayName: 'Filters',
+                    name: 'filters',
+                    type: 'collection',
+                    placeholder: 'Add Filter',
+                    default: {},
+                    displayOptions: {
+                        show: { resource: ['workPackage'], operation: ['getFiltered'] },
                     },
+                    options: [
+                        {
+                            displayName: 'Status',
+                            name: 'status_id',
+                            type: 'options',
+                            options: [
+                                { name: 'Bugs Treatment',         value: '45' },
+                                { name: 'In Progress', value: '47' },
+                                { name: 'Closed',      value: '56' },
+                                { name: 'Rejected',    value: '15' },
+                                { name: 'Open',         value: '60' },
+                                { name: 'Product Confirmation',         value: '65' },
+                                { name: 'Resolved on LIVE',         value: '67' },
+                                { name: 'To Do',         value: '1' },
+                              ],
+                            default: '',
+                        },
+                        {
+                            displayName: 'Assignee',
+                            name: 'assignee',
+                            type: 'resourceLocator',
+                            default: {},
+                            required: false,
+                            description: 'The assignee to filter work packages by',
+                            modes: [
+                                {
+                                    displayName: 'From List',
+                                    name: 'list',
+                                    type: 'list',
+                                    placeholder: 'Search project members…',
+                                    typeOptions: {
+                                        searchListMethod: 'searchUsers',
+                                        searchable: true,
+                                        searchFilterRequired: false,
+                                    },
+                                },
+                                
+                            ],
+                        }
+                    ],
                 },
-                description: 'Select the assignee from the project members',
-            },
-            {
-                displayName: 'Priority',
-                name: 'priorityId',
-                type: 'options',
-                options: [
-                    { name: '(Any)', value: '' },
-                    { name: 'Low', value: '1' },
-                    { name: 'Normal', value: '8' },
-                    { name: 'High', value: '9' },
-                    { name: 'Immediate', value: '10' },
-                ],
-                default: '',
-                displayOptions: {
-                    show: { resource: ['workPackage'], operation: ['getFiltered'] },
-                },
-            },
-            {
-                displayName: 'Status',
-                name: 'statusFilter',
-                type: 'options',
-                options: [
-                    { name: '(Any)', value: '' },
-                    { name: 'Open', value: 'o' },
-                    { name: 'Closed', value: 'c' },
-                    { name: 'Specific ID (manual input)', value: 'manual' },
-                ],
-                default: '',
-                displayOptions: {
-                    show: { resource: ['workPackage'], operation: ['getFiltered'] },
-                },
-            },
-            {
-                displayName: 'Status ID',
-                name: 'statusId',
-                type: 'string',
-                default: '',
-                displayOptions: {
-                    show: {
-                        resource: ['workPackage'],
-                        operation: ['getFiltered'],
-                        statusFilter: ['manual'],
-                    },
-                },
-                description: 'Specific status ID to filter by',
-            },
-            {
-                displayName: 'Due Date Filter',
-                name: 'dueDateFilter',
-                type: 'options',
-                options: [
-                    { name: 'None', value: 'none' },
-                    { name: 'Overdue', value: '<t+0' },
-                    { name: 'Due This Week', value: 'w' },
-                    { name: 'Due in 7 Days', value: '<t+7' },
-                ],
-                default: 'none',
-                displayOptions: {
-                    show: { resource: ['workPackage'], operation: ['getFiltered'] },
-                },
-            },
-            {
-                displayName: 'Subject',
-                name: 'subject',
-                type: 'string',
-                default: '',
-                required: true,
-                displayOptions: {
-                    show: { resource: ['workPackage'], operation: ['create'] },
-                },
-                description: 'Title/subject of the work package',
-            },
-            {
-                displayName: 'Additional Fields',
-                name: 'additionalFields',
-                type: 'collection',
-                placeholder: 'Add Field',
-                default: {},
-                displayOptions: {
-                    show: { resource: ['workPackage'], operation: ['create', 'update'] },
-                },
-                options: [
-                    {
-                        displayName: 'Description',
-                        name: 'description',
-                        type: 'string',
-                        default: '',
-                        typeOptions: { rows: 3 },
-                    },
-                    {
-                        displayName: 'Assignee ID',
-                        name: 'assigneeId',
-                        type: 'string',
-                        default: '',
-                        description: 'User ID to assign the work package to',
-                    },
-                    {
-                        displayName: 'Due Date',
-                        name: 'dueDate',
-                        type: 'dateTime',
-                        default: '',
-                    },
-                    {
-                        displayName: 'Start Date',
-                        name: 'startDate',
-                        type: 'dateTime',
-                        default: '',
-                    },
-                    {
-                        displayName: 'Estimated Hours',
-                        name: 'estimatedHours',
-                        type: 'number',
-                        default: 0,
-                    },
-                    {
-                        displayName: 'Priority',
-                        name: 'priority',
-                        type: 'options',
-                        options: [
-                            { name: 'Low', value: 'low' },
-                            { name: 'Normal', value: 'normal' },
-                            { name: 'High', value: 'high' },
-                            { name: 'Immediate', value: 'immediate' },
-                        ],
-                        default: 'normal',
-                    },
-                ],
-            },
-
-            // ─── TIME ENTRY FIELDS ───────────────────────────────────────
-            {
-                displayName: 'Work Package ID',
-                name: 'workPackageId',
-                type: 'string',
-                default: '',
-                required: true,
-                displayOptions: {
-                    show: { resource: ['timeEntry'], operation: ['create'] },
-                },
-                description: 'The ID of the work package to log time against',
-            },
-            {
-                displayName: 'Hours',
-                name: 'hours',
-                type: 'number',
-                default: 1,
-                required: true,
-                displayOptions: {
-                    show: { resource: ['timeEntry'], operation: ['create', 'update'] },
-                },
-                description: 'Number of hours to log',
-            },
-            {
-                displayName: 'Spent On (Date)',
-                name: 'spentOn',
-                type: 'dateTime',
-                default: '',
-                required: true,
-                displayOptions: {
-                    show: { resource: ['timeEntry'], operation: ['create', 'update'] },
-                },
-                description: 'The date the time was spent',
-            },
-            {
-                displayName: 'Additional Fields',
-                name: 'additionalFields',
-                type: 'collection',
-                placeholder: 'Add Field',
-                default: {},
-                displayOptions: {
-                    show: { resource: ['timeEntry'], operation: ['create', 'update'] },
-                },
-                options: [
-                    {
-                        displayName: 'Comment',
-                        name: 'comment',
-                        type: 'string',
-                        default: '',
-                        typeOptions: { rows: 2 },
-                    },
-                ],
-            },
+                
         ],
+    };
+
+    methods = {
+        listSearch: {
+            async searchProjects(
+                this: ILoadOptionsFunctions,
+                query?: string,
+            ): Promise<{ results: Array<{ name: string; value: string }> }> {
+                const credentials = await this.getCredentials('openProjectApi');
+                const baseUrl = `${credentials.baseUrl}/api/v3`;
+                const qs: Record<string, string | number> = { pageSize: 50 };
+                const q = query?.trim();
+                if (q) {
+                    qs.filters = JSON.stringify([
+                        { name: { operator: '~', values: [q] } },
+                    ]);
+                }
+                const response = await this.helpers.httpRequestWithAuthentication.call(
+                    this,
+                    'openProjectApi',
+                    { method: 'GET', url: `${baseUrl}/projects`, json: true, qs },
+                );
+                const elements = response._embedded?.elements ?? [];
+                return {
+                    results: elements.map((project: { name: string; id: number }) => ({
+                        name: project.name,
+                        value: String(project.id),
+                    })),
+                };
+            },
+
+            async searchUsers(
+                this: ILoadOptionsFunctions,
+                query?: string,
+            ): Promise<{ results: Array<{ name: string; value: string }> }> {
+                const projectId = this.getNodeParameter('projectId', '', {
+                    extractValue: true,
+                }) as string;
+
+                const q = query?.trim();
+                if (!projectId?.trim() || !q) {
+                    // UI will require a query (searchFilterRequired: true),
+                    // but keep this defensive to avoid bad requests.
+                    return { results: [{name: 'me', value: 'me'}] };
+                }
+
+                const credentials = await this.getCredentials('openProjectApi');
+                const baseUrl = `${credentials.baseUrl}/api/v3`;
+
+                // OpenProject can't filter /users by project directly.
+                // We list memberships in the selected project, optionally narrowed by principal name.
+                const filters: Array<Record<string, any>> = [
+                    { project: { operator: '=', values: [String(projectId)] } },
+                    { any_name_attribute: { operator: '~', values: [q] } },
+                ];
+
+                const response = await this.helpers.httpRequestWithAuthentication.call(
+                    this,
+                    'openProjectApi',
+                    {
+                        method: 'GET',
+                        url: `${baseUrl}/memberships`,
+                        json: true,
+                        qs: { filters: JSON.stringify(filters), pageSize: 200 },
+                    },
+                );
+
+                const elements = response._embedded?.elements ?? [];
+                const seen = new Set<string>();
+                const results: Array<{ name: string; value: string }> = [{name: 'me', value: 'me'}];
+
+                for (const membership of elements) {
+                    const links = (membership as IDataObject)._links as IDataObject | undefined;
+                    const principal = links?.principal as { href?: string; title?: string } | undefined;
+                    const href = principal?.href ?? '';
+                    const title = principal?.title ?? '';
+                    const userMatch = href.match(/\/users\/(\d+)\/?$/);
+                    if (!userMatch || !title) continue;
+                    const id = userMatch[1];
+                    if (seen.has(id)) continue;
+                    seen.add(id);
+                    results.push({ name: title, value: id });
+                }
+
+                // results.sort((a, b) => a.name.localeCompare(b.name));
+                return { results };
+            },
+        },
     };
 
     methods = {
@@ -478,299 +302,90 @@ export class OpenProject implements INodeType {
 
             // ─── PROJECTS ───────────────────────────────────────────────
             if (resource === 'project') {
-                if (operation === 'getAll') {
-                    const response = await this.helpers.httpRequestWithAuthentication.call(
-                        this, 'openProjectApi',
-                        { method: 'GET', url: `${baseUrl}/projects`, json: true },
-                    );
-                    console.log(response);
-                    const projects = response._embedded?.elements ?? [];
-                    returnData.push(...projects);
 
-                } else if (operation === 'get') {
-                    const id = this.getNodeParameter('id', i) as string;
-                    const response = await this.helpers.httpRequestWithAuthentication.call(
-                        this, 'openProjectApi',
-                        { method: 'GET', url: `${baseUrl}/projects/${id}`, json: true },
-                    );
-                    returnData.push(response);
-
-                } else if (operation === 'create') {
-                    const name = this.getNodeParameter('name', i) as string;
-                    const identifier = this.getNodeParameter('identifier', i) as string;
-                    const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
-                    const body: IDataObject = { name, identifier, ...additionalFields };
-                    const response = await this.helpers.httpRequestWithAuthentication.call(
-                        this, 'openProjectApi',
-                        { method: 'POST', url: `${baseUrl}/projects`, body, json: true },
-                    );
-                    returnData.push(response);
-
-                } else if (operation === 'update') {
-                    const id = this.getNodeParameter('id', i) as string;
-                    const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
-                    const response = await this.helpers.httpRequestWithAuthentication.call(
-                        this, 'openProjectApi',
-                        { method: 'PATCH', url: `${baseUrl}/projects/${id}`, body: additionalFields, json: true },
-                    );
-                    returnData.push(response);
-
-                } else if (operation === 'delete') {
-                    const id = this.getNodeParameter('id', i) as string;
-                    await this.helpers.httpRequestWithAuthentication.call(
-                        this, 'openProjectApi',
-                        { method: 'DELETE', url: `${baseUrl}/projects/${id}`, json: true },
-                    );
-                    returnData.push({ success: true, id });
-                }
             }
 
             // ─── WORK PACKAGES ──────────────────────────────────────────
             else if (resource === 'workPackage') {
-                if (operation === 'getAll') {
-                    const projectId = this.getNodeParameter('projectId', i) as string;
+                if (operation === 'getFiltered') {
+                    const projectId = this.getNodeParameter('projectId', i, '', {
+                        extractValue: true,
+                    }) as string;
+                    const filterParams = this.getNodeParameter('filters', i, {}) as Record<string, any>;
+                    // const opts = this.getNodeParameter('additionalOptions', i, {}) as Record<string, any>;
+                  
+                    // Build the filters array for OpenProject API
+                    const filters: Array<Record<string, any>> = [];
+                  
+                    // Multi-value filters (operator "=")
+                    const statusValues = filterParams.status_id as string[] | string | undefined;
+                    const assigneeValues = filterParams.assignee.value as string | undefined;
+                    console.log("assigneeValues", assigneeValues);
+                    if (assigneeValues) {
+                        filters.push({ assigned_to: { operator: '=', values: [assigneeValues] } });
+                    }
+                    console.log("filters", filters);
+                    if (statusValues && (Array.isArray(statusValues) ? statusValues.length > 0 : statusValues !== '')) {
+                    const values = Array.isArray(statusValues) ? statusValues : [statusValues];
+                    filters.push({ status: { operator: '=', values } });
+                    }
+                    console.log("filters", filters);
+                  
+                    // Single-value ID filters
+                    // const singleIdFilters = ['author_id', 'assigned_to_id', 'version_id', 'category_id'];
+                    // for (const field of singleIdFilters) {
+                    //   const val = filterParams[field] as string | undefined;
+                    //   if (val) {
+                    //     filters.push({ [field]: { operator: '=', values: [val] } });
+                    //   }
+                    // }
+                  
+                    // Subject contains
+                    // if (filterParams.subject) {
+                    //   filters.push({ subject: { operator: '**', values: [filterParams.subject] } });
+                    // }
+                  
+                    // Date filters
+                    // if (filterParams.created_at_after) {
+                    //   filters.push({ created_at: { operator: '>d', values: [filterParams.created_at_after] } });
+                    // }
+                    // if (filterParams.created_at_before) {
+                    //   filters.push({ created_at: { operator: '<d', values: [filterParams.created_at_before] } });
+                    // }
+                    // if (filterParams.updated_at_after) {
+                    //   filters.push({ updated_at: { operator: '>d', values: [filterParams.updated_at_after] } });
+                    // }
+                    // if (filterParams.due_date_before) {
+                    //   filters.push({ due_date: { operator: '<d', values: [filterParams.due_date_before] } });
+                    // }
+                  
+                    // Build query string
+                    const qs: Record<string, any> = {};
+                    if (filters.length) qs.filters = JSON.stringify(filters);
+                    // if (opts.pageSize)  qs.pageSize = opts.pageSize;
+                    // if (opts.offset)    qs.offset   = opts.offset;
+                    // if (opts.sortBy)    qs.sortBy   = JSON.stringify([[opts.sortBy, opts.sortDir ?? 'desc']]);
+                  
+                    // Choose endpoint: project-scoped or global
+                    const endpoint = projectId
+                      ? `/projects/${projectId}/work_packages`
+                      : '/work_packages';
+                    console.log("qs", qs);
                     const response = await this.helpers.httpRequestWithAuthentication.call(
                         this, 'openProjectApi',
-                        { method: 'GET', url: `${baseUrl}/projects/${projectId}/work_packages`, json: true },
+                        { method: 'GET', url: `${baseUrl}/${endpoint}`, json: true, qs },
                     );
                     const workPackages = response._embedded?.elements ?? [];
-                    returnData.push(...workPackages);
-
-                } else if (operation === 'get') {
-                    const id = this.getNodeParameter('id', i) as string;
-                    // Fetch both simultaneously
-                    const [response, activitiesResponse] = await Promise.all([
-                        this.helpers.httpRequestWithAuthentication.call(
-                            this, 'openProjectApi',
-                            { method: 'GET', url: `${baseUrl}/work_packages/${id}`, json: true },
-                        ),
-                        this.helpers.httpRequestWithAuthentication.call(
-                            this, 'openProjectApi',
-                            { method: 'GET', url: `${baseUrl}/work_packages/${id}/activities`, json: true },
-                        ),
-                    ]);
-
-                        // Get last activity
-                    const activities = activitiesResponse._embedded?.elements ?? [];
-                    const lastActivity = activities[activities.length - 1];
-
-                
-                    const result: IDataObject = {
-                        // Core
-                        id: response.id,
-                        subject: response.subject,
-                        percentageDone: response.percentageDone,
-                        startDate: response.startDate,
-                        dueDate: response.dueDate,
-                        estimatedTime: response.estimatedTime,
-                        spentTime: response.spentTime,
-                        createdAt: response.createdAt,
-                        updatedAt: response.updatedAt,
-                
-                        // Flattened from _links
-                        statusName: response._links?.status?.title,
-                        typeName: response._links?.type?.title,
-                        priorityName: response._links?.priority?.title,
-                        projectName: response._links?.project?.title,
-                        categoryName: response._links?.category?.title,
-                        versionName: response._links?.version?.title,
-                        assigneeName: response._links?.assignee?.title,
-                        responsibleName: response._links?.responsible?.title,
-                        authorName: response._links?.author?.title,
-                
-                        // IDs for further API calls
-                        statusId: response._embedded?.status?.id,
-                        assigneeId: response._embedded?.assignee?.id,
-                        responsibleId: response._embedded?.responsible?.id,
-                        projectId: response._embedded?.project?.id,
-                        isClosed: response._embedded?.status?.isClosed,
-
-                         // Last activity
-                        lastActivityAt: lastActivity?.createdAt ?? null,
-                        lastActivityBy: lastActivity?.links?.user?.title ?? lastActivity?._links?.user?.title ?? null,
-                        lastActivityComment: lastActivity?.comment?.raw ?? null,
-                    };
-                
-                    returnData.push(result);
-                
-                } else if (operation === 'create') {
-                    const projectId = this.getNodeParameter('projectId', i) as string;
-                    const subject = this.getNodeParameter('subject', i) as string;
-                    const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
-
-                    const body: IDataObject = { subject };
-
-                    if (additionalFields.description) {
-                        body.description = { raw: additionalFields.description };
-                    }
-                    if (additionalFields.assigneeId) {
-                        body._links = { assignee: { href: `/api/v3/users/${additionalFields.assigneeId}` } };
-                    }
-                    if (additionalFields.dueDate) body.dueDate = additionalFields.dueDate;
-                    if (additionalFields.startDate) body.startDate = additionalFields.startDate;
-                    if (additionalFields.estimatedHours) body.estimatedTime = `PT${additionalFields.estimatedHours}H`;
-
-                    const response = await this.helpers.httpRequestWithAuthentication.call(
-                        this, 'openProjectApi',
-                        { method: 'POST', url: `${baseUrl}/projects/${projectId}/work_packages`, body, json: true },
-                    );
-                    returnData.push(response);
-
-                } else if (operation === 'update') {
-                    const id = this.getNodeParameter('id', i) as string;
-                    const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
-                    const response = await this.helpers.httpRequestWithAuthentication.call(
-                        this, 'openProjectApi',
-                        { method: 'PATCH', url: `${baseUrl}/work_packages/${id}`, body: additionalFields, json: true },
-                    );
-                    returnData.push(response);
-
-                } else if (operation === 'delete') {
-                    const id = this.getNodeParameter('id', i) as string;
-                    await this.helpers.httpRequestWithAuthentication.call(
-                        this, 'openProjectApi',
-                        { method: 'DELETE', url: `${baseUrl}/work_packages/${id}`, json: true },
-                    );
-                    returnData.push({ success: true, id });
-
-                } else if (operation === 'getFiltered') {
-                    const projectId = this.getNodeParameter('projectId', i) as string;
-                    const assigneeInputMethod = this.getNodeParameter('assigneeInputMethod', i) as string;
-                    const priorityId = this.getNodeParameter('priorityId', i) as string;
-                    const statusFilter = this.getNodeParameter('statusFilter', i) as string;
-                    const dueDateFilter = this.getNodeParameter('dueDateFilter', i) as string;
-
-                    const filters: IDataObject[] = [];
-
-                    if (assigneeInputMethod === 'manual') {
-                        const assigneeId = this.getNodeParameter('assigneeId', i) as string;
-                        if (assigneeId) {
-                            filters.push({ assignee: { operator: '=', values: [assigneeId] } });
-                        }
-                    } else if (assigneeInputMethod === 'select') {
-                        const assigneeSelected = this.getNodeParameter('assigneeSelected', i) as string;
-                        if (assigneeSelected) {
-                            filters.push({ assignee: { operator: '=', values: [assigneeSelected] } });
-                        }
-                    }
-
-                    if (priorityId) {
-                        filters.push({ priority: { operator: '=', values: [priorityId] } });
-                    }
-
-                    if (statusFilter === 'o') {
-                        filters.push({ status: { operator: 'o', values: [] } });
-                    } else if (statusFilter === 'c') {
-                        filters.push({ status: { operator: 'c', values: [] } });
-                    } else if (statusFilter === 'manual') {
-                        const statusId = this.getNodeParameter('statusId', i) as string;
-                        if (statusId) {
-                            filters.push({ status: { operator: '=', values: [statusId] } });
-                        }
-                    }
-
-                    if (dueDateFilter && dueDateFilter !== 'none') {
-                        filters.push({ dueDate: { operator: dueDateFilter, values: [] } });
-                    }
-
-                    let url = `${baseUrl}/projects/${projectId}/work_packages`;
-                    if (filters.length > 0) {
-                        url += `?filters=${encodeURIComponent(JSON.stringify(filters))}`;
-                    }
-
-                    const response = await this.helpers.httpRequestWithAuthentication.call(
-                        this, 'openProjectApi',
-                        { method: 'GET', url, json: true },
-                    );
-
-                    const elements: IDataObject[] = (response._embedded?.elements ?? []) as IDataObject[];
-                    const flattened = elements.map((wp: IDataObject): IDataObject => ({
-                        id: wp.id,
-                        subject: wp.subject,
-                        percentageDone: wp.percentageDone,
-                        startDate: wp.startDate,
-                        dueDate: wp.dueDate,
-                        createdAt: wp.createdAt,
-                        updatedAt: wp.updatedAt,
-                        statusName: (wp._links as IDataObject)?.status ? ((wp._links as IDataObject).status as IDataObject).title : undefined,
-                        priorityName: (wp._links as IDataObject)?.priority ? ((wp._links as IDataObject).priority as IDataObject).title : undefined,
-                        assigneeName: (wp._links as IDataObject)?.assignee ? ((wp._links as IDataObject).assignee as IDataObject).title : undefined,
-                        projectName: (wp._links as IDataObject)?.project ? ((wp._links as IDataObject).project as IDataObject).title : undefined,
-                        typeName: (wp._links as IDataObject)?.type ? ((wp._links as IDataObject).type as IDataObject).title : undefined,
-                    }));
-                    returnData.push(...flattened);
-                }
-            }
-
-            // ─── TIME ENTRIES ────────────────────────────────────────────
-            else if (resource === 'timeEntry') {
-                if (operation === 'getAll') {
-                    const response = await this.helpers.httpRequestWithAuthentication.call(
-                        this, 'openProjectApi',
-                        { method: 'GET', url: `${baseUrl}/time_entries`, json: true },
-                    );
-                    const entries = response._embedded?.elements ?? [];
-                    returnData.push(...entries);
-
+                    returnData.push(...workPackages.map((wp: any) => ({ json: wp })));
                 } else if (operation === 'get') {
                     const id = this.getNodeParameter('id', i) as string;
                     const response = await this.helpers.httpRequestWithAuthentication.call(
                         this, 'openProjectApi',
-                        { method: 'GET', url: `${baseUrl}/time_entries/${id}`, json: true },
+                        { method: 'GET', url: `${baseUrl}/work_packages/${id}`, json: true },
                     );
+                    
                     returnData.push(response);
 
-                } else if (operation === 'create') {
-                    const workPackageId = this.getNodeParameter('workPackageId', i) as string;
-                    const hours = this.getNodeParameter('hours', i) as number;
-                    const spentOn = this.getNodeParameter('spentOn', i) as string;
-                    const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
-
-                    const body: IDataObject = {
-                        hours: `PT${hours}H`,
-                        spentOn,
-                        _links: {
-                            workPackage: { href: `/api/v3/work_packages/${workPackageId}` },
-                        },
-                    };
-
-                    if (additionalFields.comment) {
-                        body.comment = { raw: additionalFields.comment };
-                    }
-
-                    const response = await this.helpers.httpRequestWithAuthentication.call(
-                        this, 'openProjectApi',
-                        { method: 'POST', url: `${baseUrl}/time_entries`, body, json: true },
-                    );
-                    returnData.push(response);
-
-                } else if (operation === 'update') {
-                    const id = this.getNodeParameter('id', i) as string;
-                    const hours = this.getNodeParameter('hours', i) as number;
-                    const spentOn = this.getNodeParameter('spentOn', i) as string;
-                    const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
-
-                    const body: IDataObject = {
-                        hours: `PT${hours}H`,
-                        spentOn,
-                    };
-                    if (additionalFields.comment) {
-                        body.comment = { raw: additionalFields.comment };
-                    }
-
-                    const response = await this.helpers.httpRequestWithAuthentication.call(
-                        this, 'openProjectApi',
-                        { method: 'PATCH', url: `${baseUrl}/time_entries/${id}`, body, json: true },
-                    );
-                    returnData.push(response);
-
-                } else if (operation === 'delete') {
-                    const id = this.getNodeParameter('id', i) as string;
-                    await this.helpers.httpRequestWithAuthentication.call(
-                        this, 'openProjectApi',
-                        { method: 'DELETE', url: `${baseUrl}/time_entries/${id}`, json: true },
-                    );
-                    returnData.push({ success: true, id });
                 }
             }
         }
