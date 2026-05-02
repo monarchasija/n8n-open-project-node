@@ -87,7 +87,7 @@ export class OpenProject implements INodeType {
                     displayName: 'Project',
                     name: 'projectId',
                     type: 'resourceLocator',
-                    default: { mode: 'list', value: '' },
+                    default: {},
                     required: true,
                     displayOptions: {
                         show: { resource: ['workPackage'], operation: ['getFiltered'] },
@@ -105,21 +105,7 @@ export class OpenProject implements INodeType {
                                 searchFilterRequired: false,
                             },
                         },
-                        {
-                            displayName: 'By ID',
-                            name: 'id',
-                            type: 'string',
-                            placeholder: 'e.g. 42',
-                            validation: [
-                                {
-                                    type: 'regex',
-                                    properties: {
-                                        regex: '^[0-9]+$',
-                                        errorMessage: 'Enter a numeric project ID',
-                                    },
-                                },
-                            ],
-                        },
+                        
                     ],
                 },
                 {
@@ -152,7 +138,7 @@ export class OpenProject implements INodeType {
                             displayName: 'Assignee',
                             name: 'assignee',
                             type: 'resourceLocator',
-                            default: { mode: 'list', value: '' },
+                            default: {},
                             required: false,
                             description: 'The assignee to filter work packages by',
                             modes: [
@@ -164,24 +150,10 @@ export class OpenProject implements INodeType {
                                     typeOptions: {
                                         searchListMethod: 'searchUsers',
                                         searchable: true,
-                                        searchFilterRequired: true,
+                                        searchFilterRequired: false,
                                     },
                                 },
-                                {
-                                    displayName: 'By ID',
-                                    name: 'id',
-                                    type: 'string',
-                                    placeholder: 'e.g. 5',
-                                    validation: [
-                                        {
-                                            type: 'regex',
-                                            properties: {
-                                                regex: '^[0-9]+$',
-                                                errorMessage: 'Enter a numeric user ID',
-                                            },
-                                        },
-                                    ],
-                                },
+                                
                             ],
                         }
                     ],
@@ -231,7 +203,7 @@ export class OpenProject implements INodeType {
                 if (!projectId?.trim() || !q) {
                     // UI will require a query (searchFilterRequired: true),
                     // but keep this defensive to avoid bad requests.
-                    return { results: [] };
+                    return { results: [{name: 'me', value: 'me'}] };
                 }
 
                 const credentials = await this.getCredentials('openProjectApi');
@@ -257,7 +229,7 @@ export class OpenProject implements INodeType {
 
                 const elements = response._embedded?.elements ?? [];
                 const seen = new Set<string>();
-                const results: Array<{ name: string; value: string }> = [];
+                const results: Array<{ name: string; value: string }> = [{name: 'me', value: 'me'}];
 
                 for (const membership of elements) {
                     const links = (membership as IDataObject)._links as IDataObject | undefined;
@@ -272,7 +244,7 @@ export class OpenProject implements INodeType {
                     results.push({ name: title, value: id });
                 }
 
-                results.sort((a, b) => a.name.localeCompare(b.name));
+                // results.sort((a, b) => a.name.localeCompare(b.name));
                 return { results };
             },
         },
@@ -307,10 +279,17 @@ export class OpenProject implements INodeType {
                   
                     // Multi-value filters (operator "=")
                     const statusValues = filterParams.status_id as string[] | string | undefined;
+                    const assigneeValues = filterParams.assignee.value as string | undefined;
+                    console.log("assigneeValues", assigneeValues);
+                    if (assigneeValues) {
+                        filters.push({ assigned_to: { operator: '=', values: [assigneeValues] } });
+                    }
+                    console.log("filters", filters);
                     if (statusValues && (Array.isArray(statusValues) ? statusValues.length > 0 : statusValues !== '')) {
                     const values = Array.isArray(statusValues) ? statusValues : [statusValues];
                     filters.push({ status: { operator: '=', values } });
                     }
+                    console.log("filters", filters);
                   
                     // Single-value ID filters
                     // const singleIdFilters = ['author_id', 'assigned_to_id', 'version_id', 'category_id'];
@@ -351,7 +330,7 @@ export class OpenProject implements INodeType {
                     const endpoint = projectId
                       ? `/projects/${projectId}/work_packages`
                       : '/work_packages';
-                    // console.log("values", qs.filters[0].status.values);
+                    console.log("qs", qs);
                     const response = await this.helpers.httpRequestWithAuthentication.call(
                         this, 'openProjectApi',
                         { method: 'GET', url: `${baseUrl}/${endpoint}`, json: true, qs },
